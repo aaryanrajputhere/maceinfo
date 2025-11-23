@@ -41,6 +41,8 @@ export const sendRFQEmail = async (
 
     const secureLink = `https://maceinfo.com/vendor-reply/${rfqId}/${token}`;
 
+
+
     const materialsList = items
       .map(
         (item, idx) =>
@@ -56,8 +58,9 @@ export const sendRFQEmail = async (
           `${item["Unit"] || item.unit || ""}${
             item["Unit"] || item.unit ? ", " : ""
           }` +
-          `Qty: ${item["Quantity"] || item.qty || ""}`
-          +`Notes: ${item["Notes"] || item.notes || ""}`
+          `Qty: ${item["Quantity"] || item.qty || ""}${
+            item["Notes"] || item.notes ? `, Notes: ${item["Notes"] || item.notes}` : ""
+          }`
       )
       .join("<br>");
 
@@ -72,6 +75,7 @@ export const sendRFQEmail = async (
         <p><strong>Project:</strong> ${projectInfo.projectName}</p>
         <p><strong>Site Address:</strong> ${projectInfo.siteAddress || ""}</p>
         <p><strong>Needed By:</strong> ${projectInfo.neededBy || ""}</p>
+        ${projectInfo.notes ? `<p><strong>Project Notes:</strong> ${projectInfo.notes}</p>` : ""}
         <p><strong>Requested Materials:</strong><br>${materialsList}</p>
         <p>Files: ${driveLinks
           .map((l) => `<a href="${l}">File</a>`)
@@ -82,6 +86,7 @@ export const sendRFQEmail = async (
         <p>Thank you,<br>Maceinfo RFQ System<br>rfq@maceinfo.com</p>
       `,
     };
+
 
     const result = await sgMail.send(msg);
     console.log(
