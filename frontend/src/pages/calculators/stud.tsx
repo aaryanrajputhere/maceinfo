@@ -125,7 +125,6 @@ const StudCalculator: React.FC = () => {
       quantity: Math.ceil(result.plates / 2), // Half of total plates
       vendors: "Home Depot, Lowes, Menards",
       selectedVendors: ["Home Depot", "Lowes", "Menards"],
-
       image: "",
       addedAt: new Date().toLocaleString(),
     });
@@ -135,7 +134,6 @@ const StudCalculator: React.FC = () => {
 
     // Save back to localStorage
     localStorage.setItem("quote", JSON.stringify(updatedQuote));
-
     // Visual feedback
     const button = document.querySelector(
       "[data-stud-quote-btn]"

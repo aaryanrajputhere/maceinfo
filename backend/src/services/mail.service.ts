@@ -57,6 +57,7 @@ export const sendRFQEmail = async (
             item["Unit"] || item.unit ? ", " : ""
           }` +
           `Qty: ${item["Quantity"] || item.qty || ""}`
+          +`Notes: ${item["Notes"] || item.notes || ""}`
       )
       .join("<br>");
 
