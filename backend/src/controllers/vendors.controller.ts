@@ -290,6 +290,7 @@ export const handleVendorReply = async (req: Request, res: Response) => {
                   : deliveryChargesNum,
                 lead_time: itemReply.leadTime || "",
                 substitutions: itemReply.substitutions || "",
+                notes: itemReply.notes || "",
                 file_link:
                   fileLinksForItem.length > 0
                     ? fileLinksForItem.join(",")

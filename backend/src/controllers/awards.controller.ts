@@ -182,7 +182,13 @@ export const awardItem = async (
         requester_phone: true,
       },
     });
-
+    const itemDet9ails = await prisma.vendorReplyItem.findFirst({
+      where: { rfq_id: tokenRfqId, item_name, vendor_name },
+      select: {
+        quantity: true,
+        unit_price: true,
+      },
+    });
     if (!rfqDetails) {
       console.warn(`[awards] RFQ details not found for rfq_id=${tokenRfqId}`);
     }

@@ -70,6 +70,7 @@ model VendorReplyItem {
   delivery_charge Float?
   lead_time       String
   substitutions   String?
+  notes          String?
   file_link       String?
   vendor_name     String
   created_at      DateTime @default(now())
