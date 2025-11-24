@@ -41,8 +41,6 @@ export const sendRFQEmail = async (
 
     const secureLink = `https://maceinfo.com/vendor-reply/${rfqId}/${token}`;
 
-
-
     const materialsList = items
       .map(
         (item, idx) =>
@@ -59,7 +57,9 @@ export const sendRFQEmail = async (
             item["Unit"] || item.unit ? ", " : ""
           }` +
           `Qty: ${item["Quantity"] || item.qty || ""}${
-            item["Notes"] || item.notes ? `, Notes: ${item["Notes"] || item.notes}` : ""
+            item["Notes"] || item.notes
+              ? `, Notes: ${item["Notes"] || item.notes}`
+              : ""
           }`
       )
       .join("<br>");
@@ -75,7 +75,11 @@ export const sendRFQEmail = async (
         <p><strong>Project:</strong> ${projectInfo.projectName}</p>
         <p><strong>Site Address:</strong> ${projectInfo.siteAddress || ""}</p>
         <p><strong>Needed By:</strong> ${projectInfo.neededBy || ""}</p>
-        ${projectInfo.notes ? `<p><strong>Project Notes:</strong> ${projectInfo.notes}</p>` : ""}
+        ${
+          projectInfo.notes
+            ? `<p><strong>Project Notes:</strong> ${projectInfo.notes}</p>`
+            : ""
+        }
         <p><strong>Requested Materials:</strong><br>${materialsList}</p>
         <p>Files: ${driveLinks
           .map((l) => `<a href="${l}">File</a>`)
@@ -86,7 +90,6 @@ export const sendRFQEmail = async (
         <p>Thank you,<br>Maceinfo RFQ System<br>rfq@maceinfo.com</p>
       `,
     };
-
 
     const result = await sgMail.send(msg);
     console.log(
@@ -172,6 +175,9 @@ export const vendorAwardNotification = async (
   email: string,
   rfqId: string,
   itemName: string,
+  quantity: number,
+  unitPrice: number,
+  notes: string,
   vendorName: string,
   projectName: string,
   address: string,
@@ -251,8 +257,37 @@ export const vendorAwardNotification = async (
           </div>
 
           <div style="background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2E86C1;">
-            <h3 style="color: #033159; margin-top: 0;">Awarded Item</h3>
-            <p style="font-size: 18px; margin: 0; font-weight: bold; color: #033159;">${itemName}</p>
+            <h3 style="color: #033159; margin-top: 0;">Awarded Item Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 180px;">Item Name:</td>
+                <td style="padding: 8px 0; font-size: 18px; font-weight: bold; color: #033159;">${itemName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Quantity:</td>
+                <td style="padding: 8px 0;">${quantity}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Unit Price:</td>
+                <td style="padding: 8px 0;">$${unitPrice.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Total Value:</td>
+                <td style="padding: 8px 0; font-size: 16px; font-weight: bold; color: #2E86C1;">$${(
+                  quantity * unitPrice
+                ).toFixed(2)}</td>
+              </tr>
+              ${
+                notes
+                  ? `
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Notes:</td>
+                <td style="padding: 8px 0;">${notes}</td>
+              </tr>
+              `
+                  : ""
+              }
+            </table>
           </div>
 
           <p>

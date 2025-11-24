@@ -182,11 +182,12 @@ export const awardItem = async (
         requester_phone: true,
       },
     });
-    const itemDet9ails = await prisma.vendorReplyItem.findFirst({
+    const itemDetails = await prisma.vendorReplyItem.findFirst({
       where: { rfq_id: tokenRfqId, item_name, vendor_name },
       select: {
         quantity: true,
         unit_price: true,
+        notes: true,
       },
     });
     if (!rfqDetails) {
@@ -219,6 +220,9 @@ export const awardItem = async (
         vendorEmail,
         rfq_id,
         item_name,
+        itemDetails?.quantity || 0,
+        itemDetails?.unit_price || 0,
+        itemDetails?.notes || "",
         vendor_name,
         rfqDetails.project_name,
         rfqDetails.project_address,
