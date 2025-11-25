@@ -96,7 +96,7 @@ const VendorReplyPage: React.FC = () => {
 
       // Prepare itemReplies with all the data
       const itemReplies = items.map((item, index) => ({
-        itemId: item.id || `item-${index}`,
+        itemName: item["Item Name"] || `Item ${index + 1}`,
         pricing: fields[index]?.price || "",
         leadTime: fields[index]?.lead_time || "",
         notes: fields[index]?.notes || "",

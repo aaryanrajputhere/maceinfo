@@ -159,18 +159,19 @@ export const handleVendorReply = async (req: Request, res: Response) => {
     console.log("Received files:", files);
 
     // Extract files and map them to items for drive upload
-    const itemFiles: { [itemId: string]: Express.Multer.File[] } = {};
+    const itemFiles: { [itemName: string]: Express.Multer.File[] } = {};
     if (files && files.length > 0) {
       // Group files by item index based on field names like 'files_0', 'files_1', etc.
       files.forEach((file) => {
         if (file.fieldname && file.fieldname.startsWith("files_")) {
           const itemIndex = parseInt(file.fieldname.split("_")[1]);
-          const itemId = itemReplies[itemIndex]?.itemId || `item-${itemIndex}`;
+          const itemName =
+            itemReplies[itemIndex]?.itemName || `item-${itemIndex}`;
 
-          if (!itemFiles[itemId]) {
-            itemFiles[itemId] = [];
+          if (!itemFiles[itemName]) {
+            itemFiles[itemName] = [];
           }
-          itemFiles[itemId].push(file);
+          itemFiles[itemName].push(file);
         }
       });
     }
@@ -207,10 +208,19 @@ export const handleVendorReply = async (req: Request, res: Response) => {
 
         // Create consolidated items JSON with vendor responses
         const consolidatedItems = itemReplies.map((itemReply, index) => {
-          const originalItem = originalItems[index] || {};
+          // Match original item by name instead of index
+          const originalItem =
+            originalItems.find(
+              (item: any) => item["Item Name"] === itemReply.itemName
+            ) ||
+            originalItems[index] ||
+            {};
 
           return {
-            name: originalItem["Item Name"] || `Item ${index + 1}`,
+            name:
+              originalItem["Item Name"] ||
+              itemReply.itemName ||
+              `Item ${index + 1}`,
             size: originalItem["Size/Option"] || "",
             unit: originalItem["Unit"] || "",
             qtyRequested: originalItem["Quantity"] || "",
@@ -265,20 +275,31 @@ export const handleVendorReply = async (req: Request, res: Response) => {
         try {
           const vendorReplyItems = itemReplies.map(
             (itemReply: any, index: number) => {
-              const originalItem = originalItems[index] || {};
-              const itemId = itemReply.itemId || `item-${index}`;
+              // Match original item by name instead of index
+              const originalItem =
+                originalItems.find(
+                  (item: any) => item["Item Name"] === itemReply.itemName
+                ) ||
+                originalItems[index] ||
+                {};
+
+              const itemName =
+                itemReply.itemName ||
+                originalItem["Item Name"] ||
+                `Item ${index + 1}`;
               const quantity = parseInt(originalItem["Quantity"] || "0") || 0;
               const unitPrice = parseFloat(itemReply.pricing || "0") || 0;
               const totalPrice = +(unitPrice * quantity);
 
-              // file links for this item (if uploaded)
-              const fileLinksForItem = driveLinks[itemId] || [];
+              // file links for this item (if uploaded) - use itemName as key
+              const fileLinksForItem =
+                driveLinks[itemName] || driveLinks[`item-${index}`] || [];
 
               return {
                 rfq_id: rfqId,
                 reply_id: replyId,
                 vendor_email: vendor.email || "",
-                item_name: originalItem["Item Name"] || `Item ${index + 1}`,
+                item_name: itemName,
                 size: originalItem["Size/Option"] || "",
                 unit: originalItem["Unit"] || "",
                 quantity: quantity,
