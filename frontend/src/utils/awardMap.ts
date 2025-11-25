@@ -15,6 +15,7 @@ interface VendorReply {
   delivery_charge?: number;
   lead_time?: string;
   substitutions?: string;
+  notes?: string;
   file_link?: string | null;
   vendor_name: string;
   created_at: string;
@@ -29,6 +30,15 @@ interface VendorQuote {
   notes?: string;
   status?: string;
   replyId?: number | string;
+  substitutions?: string;
+  deliveryCharge?: number;
+  discount?: number;
+  fileLink?: string;
+  size?: string;
+  unit?: string;
+  quantity?: number;
+  totalPrice?: number;
+  vendorEmail?: string;
 }
 
 interface ItemWithVendors {
@@ -63,16 +73,25 @@ export function transformVendorReplies(
       };
     }
 
-    // Push the vendor info into the item’s vendor list
+    // Push the vendor info into the item's vendor list
     grouped[reply.item_name].vendors.push({
       vendorName: reply.vendor_name,
       leadTime: reply.lead_time
         ? new Date(reply.lead_time).toLocaleDateString()
         : undefined,
       quotedPrice: reply.unit_price?.toFixed(2),
-      notes: reply.substitutions || undefined,
+      notes: reply.notes || undefined,
       status: reply.status,
       replyId: reply.id,
+      substitutions: reply.substitutions || undefined,
+      deliveryCharge: reply.delivery_charge,
+      discount: reply.discount,
+      fileLink: reply.file_link || undefined,
+      size: reply.size,
+      unit: reply.unit,
+      quantity: reply.quantity,
+      totalPrice: reply.total_price,
+      vendorEmail: reply.vendor_email,
     });
     // ensure we keep the raw original item_name (useful when posting back to backend)
     grouped[reply.item_name].rawItemName = reply.item_name;
