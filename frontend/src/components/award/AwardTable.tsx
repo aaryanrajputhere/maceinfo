@@ -4,7 +4,7 @@ import { Package } from "lucide-react";
 interface VendorQuote {
   vendorName: string;
   leadTime?: string;
-  quotedPrice?: string; 
+  quotedPrice?: string;
   notes?: string;
   status?: string;
 }
@@ -12,7 +12,7 @@ interface VendorQuote {
 interface ItemWithQuotes {
   id: number | string;
   itemName: string;
-  requestedPrice?: string; 
+  requestedPrice?: string;
   quantity?: number | string;
   unit?: string;
   vendors: VendorQuote[];

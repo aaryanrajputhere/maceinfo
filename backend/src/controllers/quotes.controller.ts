@@ -47,22 +47,57 @@ export const createQuote = async (req: Request, res: Response) => {
     const rfqId = generateRFQ();
     console.log("-".repeat(100));
     console.log(`RFQ Initiated ${rfqId}`);
+    console.log("-".repeat(100));
+
+    console.log("📦 ITEM MAPPING STARTED");
+    console.log("-".repeat(50));
     // Map each vendor to their items (normalize vendor names to reduce mismatches)
     const vendorItemsMap: Record<string, any[]> = {};
-    items.forEach((item: any) => {
+    items.forEach((item: any, itemIndex: number) => {
+      console.log(`\n🔹 Processing Item ${itemIndex + 1}:`);
+      console.log(`   Item Name: ${item["Item Name"] || "N/A"}`);
+      console.log(`   Vendors String: "${item.Vendors || "NONE"}"`);
+
       if (item.Vendors) {
-        item.Vendors.split(",")
-          .map((v: string) => v.trim())
-          .forEach((vendorRaw: string) => {
-            const vendor = vendorRaw.trim();
-            if (!vendor) return;
-            // Keep the original casing as the key, but also support lookup via a normalized map below
-            if (!vendorItemsMap[vendor]) vendorItemsMap[vendor] = [];
-            vendorItemsMap[vendor].push(item);
-          });
+        const vendorsList = item.Vendors.split(",").map((v: string) =>
+          v.trim()
+        );
+        console.log(
+          `   Split Vendors: [${vendorsList
+            .map((v: string) => `"${v}"`)
+            .join(", ")}]`
+        );
+
+        vendorsList.forEach((vendorRaw: string, vendorIndex: number) => {
+          const vendor = vendorRaw.trim();
+          if (!vendor) {
+            console.log(`   ⚠️  Vendor ${vendorIndex + 1}: EMPTY - SKIPPING`);
+            return;
+          }
+
+          console.log(
+            `   ✅ Vendor ${vendorIndex + 1}: "${vendor}" - ADDING ITEM`
+          );
+          // Keep the original casing as the key, but also support lookup via a normalized map below
+          if (!vendorItemsMap[vendor]) vendorItemsMap[vendor] = [];
+          vendorItemsMap[vendor].push(item);
+        });
+      } else {
+        console.log(`   ⚠️  NO VENDORS ASSIGNED TO THIS ITEM`);
       }
     });
 
+    console.log("\n" + "-".repeat(50));
+    console.log("📊 VENDOR ITEMS MAP SUMMARY:");
+    console.log("-".repeat(50));
+    Object.entries(vendorItemsMap).forEach(([vendor, items]) => {
+      console.log(`\n👤 Vendor: "${vendor}"`);
+      console.log(`   Total Items: ${items.length}`);
+      items.forEach((item, idx) => {
+        console.log(`   ${idx + 1}. ${item["Item Name"] || "Unnamed Item"}`);
+      });
+    });
+    console.log("-".repeat(50));
     // Prepare vendor list as a string
     const vendorsArray = Object.keys(vendorItemsMap);
     const vendors_json = vendorsArray.join(", ");
@@ -126,39 +161,62 @@ export const createQuote = async (req: Request, res: Response) => {
       }
     });
 
+    console.log("\n" + "=".repeat(100));
+    console.log("📧 EMAIL SENDING PROCESS STARTED");
+    console.log("=".repeat(100));
     console.log(
-      "Vendor items map:",
-      Object.keys(vendorItemsMap).length,
-      "vendors"
+      `Total Vendors to Email: ${Object.keys(vendorItemsMap).length}`
     );
     console.log(
-      "Vendor items keys (sample):",
-      Object.keys(vendorItemsMap).slice(0, 20)
+      `Vendors: [${Object.keys(vendorItemsMap)
+        .map((v) => `"${v}"`)
+        .join(", ")}]`
     );
+    console.log("-".repeat(100));
 
     // Send RFQ emails to each vendor with their items
+    let emailsSentCount = 0;
+    let emailsSkippedCount = 0;
+
     for (const [vendor, vendorItems] of Object.entries(vendorItemsMap)) {
+      console.log("\n" + "-".repeat(80));
+      console.log(`📨 PROCESSING VENDOR: "${vendor}"`);
+      console.log("-".repeat(80));
+
       // Try direct lookup first, then normalized lookup as a fallback
       let email = vendorEmailLookup[vendor];
+      console.log(`   🔍 Direct Lookup: "${vendor}" → ${email || "NOT FOUND"}`);
+
       if (!email) {
         const normalized = vendor.trim().toLowerCase();
         email = vendorEmailLookupNormalized[normalized];
+        console.log(
+          `   🔍 Normalized Lookup: "${normalized}" → ${email || "NOT FOUND"}`
+        );
       }
-
-      console.log("sendRFQEmail args:", {
-        rfqId,
-        projectInfo,
-        items: vendorItems,
-        vendor: { email, name: vendor },
-        driveLinks: fileLinks,
-      });
 
       if (!email) {
-        console.warn(
-          `Skipping email for vendor '${vendor}' (no matching vendor email found in DB).`
+        console.warn(`   ❌ SKIPPING - No email found for vendor "${vendor}"`);
+        console.log(
+          `   Available vendors in DB: [${Object.keys(vendorEmailLookup)
+            .map((v) => `"${v}"`)
+            .join(", ")}]`
         );
+        emailsSkippedCount++;
         continue;
       }
+
+      console.log(`   ✅ Email Found: ${email}`);
+      console.log(`   📦 Items Being Sent: ${vendorItems.length}`);
+      vendorItems.forEach((item, idx) => {
+        console.log(`      ${idx + 1}. "${item["Item Name"] || "Unnamed"}"`);
+        console.log(`         - Category: ${item.Category || "N/A"}`);
+        console.log(`         - Size: ${item["Size/Option"] || "N/A"}`);
+        console.log(`         - Quantity: ${item.Quantity || "N/A"}`);
+        console.log(`         - Vendors String: "${item.Vendors || "N/A"}"`);
+      });
+
+      console.log(`   🚀 Sending email to ${email}...`);
 
       await sendRFQEmail(
         rfqId,
@@ -167,7 +225,17 @@ export const createQuote = async (req: Request, res: Response) => {
         { email, name: vendor },
         fileLinks
       );
+
+      emailsSentCount++;
+      console.log(`   ✅ Email sent successfully to ${email}`);
     }
+
+    console.log("\n" + "=".repeat(100));
+    console.log("📊 EMAIL SENDING SUMMARY");
+    console.log("=".repeat(100));
+    console.log(`✅ Emails Sent: ${emailsSentCount}`);
+    console.log(`❌ Emails Skipped: ${emailsSkippedCount}`);
+    console.log("=".repeat(100));
 
     // Send award access email to the requester
     let awardEmailSent = false;
