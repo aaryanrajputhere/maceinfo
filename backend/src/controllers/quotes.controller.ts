@@ -5,23 +5,69 @@ import { generateRFQ } from "../utils/generateRFQ";
 import { addRFQToSheet, RFQData } from "../services/sheets.service";
 import { sendRFQEmail, rfqAward } from "../services/mail.service";
 import { PrismaClient } from "@prisma/client";
-import { Console } from "console";
 
 const prisma = new PrismaClient();
 
+type Item = {
+  id: number;
+  Category?: string;
+  "Item Name"?: string;
+  "Size/Option"?: string;
+  Unit?: string;
+  Price?: string | number;
+  Vendors?: string;
+  image?: string;
+  Quantity?: string | number;
+  selectedVendors?: string[];
+  [key: string]: any;
+};
+
 export const createQuote = async (req: Request, res: Response) => {
   try {
-    const projectInfo = req.body.projectInfo
-      ? JSON.parse(req.body.projectInfo)
-      : null;
-    const items = req.body.items ? JSON.parse(req.body.items) : [];
-    const item_json = JSON.stringify(items); // <-- stringify the array
-    const files = req.files as Express.Multer.File[];
+    // Parse projectInfo and items safely (they may come as JSON strings)
+    let projectInfo: any = null;
+    let itemsArr: Item[] = [];
 
-    if (!projectInfo || items.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing required fields" });
+    if (req.body.projectInfo) {
+      try {
+        projectInfo =
+          typeof req.body.projectInfo === "string"
+            ? JSON.parse(req.body.projectInfo)
+            : req.body.projectInfo;
+      } catch (err) {
+        console.error("❌ Failed to parse projectInfo:", err);
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid projectInfo JSON" });
+      }
+    }
+
+    if (req.body.items) {
+      try {
+        const parsed =
+          typeof req.body.items === "string"
+            ? JSON.parse(req.body.items)
+            : req.body.items;
+        if (Array.isArray(parsed)) itemsArr = parsed as Item[];
+        else
+          return res
+            .status(400)
+            .json({ success: false, message: "items must be an array" });
+      } catch (err) {
+        console.error("❌ Failed to parse items:", err);
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid items JSON" });
+      }
+    }
+
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    if (!projectInfo || itemsArr.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: projectInfo or items",
+      });
     }
 
     // Validate required contact fields
@@ -51,24 +97,29 @@ export const createQuote = async (req: Request, res: Response) => {
 
     console.log("📦 ITEM MAPPING STARTED");
     console.log("-".repeat(50));
-    // Map each vendor to their items (normalize vendor names to reduce mismatches)
-    const vendorItemsMap: Record<string, any[]> = {};
-    items.forEach((item: any, itemIndex: number) => {
+    // Map each vendor to their items (keeping original casing as key)
+    const vendorItemsMap: Record<string, Item[]> = {};
+
+    itemsArr.forEach((item: Item, itemIndex: number) => {
       console.log(`\n🔹 Processing Item ${itemIndex + 1}:`);
       console.log(`   Item Name: ${item["Item Name"] || "N/A"}`);
       console.log(`   Vendors String: "${item.Vendors || "NONE"}"`);
 
-      if (item.Vendors) {
-        const vendorsList = item.Vendors.split(",").map((v: string) =>
-          v.trim()
-        );
-        console.log(
-          `   Split Vendors: [${vendorsList
-            .map((v: string) => `"${v}"`)
-            .join(", ")}]`
-        );
+      // Prefer `selectedVendors` if present, otherwise fall back to `Vendors` string
+      let vendorsList: string[] = [];
+      if (Array.isArray(item.selectedVendors) && item.selectedVendors.length) {
+        vendorsList = item.selectedVendors.map((v) => String(v).trim());
+      } else if (item.Vendors && typeof item.Vendors === "string") {
+        vendorsList = item.Vendors.split(",").map((v) => v.trim());
+      }
 
-        vendorsList.forEach((vendorRaw: string, vendorIndex: number) => {
+      if (vendorsList.length === 0) {
+        console.log(`   ⚠️  NO VENDORS ASSIGNED TO THIS ITEM`);
+      } else {
+        console.log(
+          `   Split Vendors: [${vendorsList.map((v) => `"${v}"`).join(", ")}]`
+        );
+        vendorsList.forEach((vendorRaw, vendorIndex) => {
           const vendor = vendorRaw.trim();
           if (!vendor) {
             console.log(`   ⚠️  Vendor ${vendorIndex + 1}: EMPTY - SKIPPING`);
@@ -78,12 +129,9 @@ export const createQuote = async (req: Request, res: Response) => {
           console.log(
             `   ✅ Vendor ${vendorIndex + 1}: "${vendor}" - ADDING ITEM`
           );
-          // Keep the original casing as the key, but also support lookup via a normalized map below
           if (!vendorItemsMap[vendor]) vendorItemsMap[vendor] = [];
           vendorItemsMap[vendor].push(item);
         });
-      } else {
-        console.log(`   ⚠️  NO VENDORS ASSIGNED TO THIS ITEM`);
       }
     });
 
@@ -98,12 +146,14 @@ export const createQuote = async (req: Request, res: Response) => {
       });
     });
     console.log("-".repeat(50));
-    // Prepare vendor list as a string
+
     const vendorsArray = Object.keys(vendorItemsMap);
     const vendors_json = vendorsArray.join(", ");
+    const items_json_string = JSON.stringify(itemsArr);
 
     // 1️⃣ Save RFQ files (creates folder + uploads files)
-    const { folderLink, fileLinks } = await saveRFQFiles(files, `RFQ-${rfqId}`);
+    const { folderLink, fileLinks } = await saveRFQFiles(files || [], `RFQ-${rfqId}`);
+
     // 2️⃣ Add RFQ metadata to Google Sheet
     const rfqData: RFQData = {
       rfq_id: rfqId,
@@ -112,13 +162,14 @@ export const createQuote = async (req: Request, res: Response) => {
       requester_email: projectInfo.requesterEmail || "",
       requester_phone: projectInfo.requesterPhone || "",
       project_name: projectInfo.projectName || "",
-      project_address: projectInfo.siteAddress || "", // Fixed: was projectAddress, should be siteAddress
+      project_address: projectInfo.siteAddress || "",
       needed_by: projectInfo.neededBy || "",
       notes: projectInfo.notes || "",
-      items_json: item_json || "",
-      vendors_json: vendors_json || "",
+      items_json: items_json_string,
+      vendors_json: vendors_json,
       drive_folder_url: folderLink || "",
     };
+
     // 2️⃣b Add RFQ to Prisma DB
     await prisma.rFQ.create({
       data: {
@@ -131,12 +182,12 @@ export const createQuote = async (req: Request, res: Response) => {
         project_address: projectInfo.siteAddress || "",
         needed_by: projectInfo.neededBy || "",
         notes: projectInfo.notes || "",
-        items_json: item_json || "",
-        vendors_json: vendors_json || "",
+        items_json: items_json_string,
+        vendors_json: vendors_json,
         drive_folder_url: folderLink || "",
-        // status, email_message_id, decision_at, awarded_vendor_name, etc. can be added as needed
       },
     });
+
     const sheetResponse = await addRFQToSheet(rfqData);
 
     // Fetch all vendors from the database
@@ -147,30 +198,23 @@ export const createQuote = async (req: Request, res: Response) => {
       },
     });
 
-    // Create lookup object from vendors array
-    // Build both a direct-name lookup and a normalized (lowercased trimmed) lookup to increase match tolerance
+    // Create lookup object from vendors array (direct and normalized)
     const vendorEmailLookup: Record<string, string> = {};
     const vendorEmailLookupNormalized: Record<string, string> = {};
-    vendors.forEach((vendor) => {
-      // Coerce nullable vendor.email to empty string to satisfy TypeScript and keep falsy-check behavior
-      const emailStr = vendor.email || "";
-      vendorEmailLookup[vendor.name] = emailStr;
-      if (vendor.name) {
-        vendorEmailLookupNormalized[vendor.name.trim().toLowerCase()] =
-          emailStr;
+    vendors.forEach((v) => {
+      const emailStr = v.email || "";
+      vendorEmailLookup[v.name] = emailStr;
+      if (v.name) {
+        vendorEmailLookupNormalized[v.name.trim().toLowerCase()] = emailStr;
       }
     });
 
     console.log("\n" + "=".repeat(100));
     console.log("📧 EMAIL SENDING PROCESS STARTED");
     console.log("=".repeat(100));
+    console.log(`Total Vendors to Email: ${vendorsArray.length}`);
     console.log(
-      `Total Vendors to Email: ${Object.keys(vendorItemsMap).length}`
-    );
-    console.log(
-      `Vendors: [${Object.keys(vendorItemsMap)
-        .map((v) => `"${v}"`)
-        .join(", ")}]`
+      `Vendors: [${vendorsArray.map((v) => `"${v}"`).join(", ")}]`
     );
     console.log("-".repeat(100));
 
@@ -178,7 +222,7 @@ export const createQuote = async (req: Request, res: Response) => {
     let emailsSentCount = 0;
     let emailsSkippedCount = 0;
 
-    for (const [vendor, vendorItems] of Object.entries(vendorItemsMap)) {
+    for (const vendor of vendorsArray) {
       console.log("\n" + "-".repeat(80));
       console.log(`📨 PROCESSING VENDOR: "${vendor}"`);
       console.log("-".repeat(80));
@@ -207,27 +251,26 @@ export const createQuote = async (req: Request, res: Response) => {
       }
 
       console.log(`   ✅ Email Found: ${email}`);
-      console.log(`   📦 Items Being Sent: ${vendorItems.length}`);
-      vendorItems.forEach((item, idx) => {
-        console.log(`      ${idx + 1}. "${item["Item Name"] || "Unnamed"}"`);
-        console.log(`         - Category: ${item.Category || "N/A"}`);
-        console.log(`         - Size: ${item["Size/Option"] || "N/A"}`);
-        console.log(`         - Quantity: ${item.Quantity || "N/A"}`);
-        console.log(`         - Vendors String: "${item.Vendors || "N/A"}"`);
-      });
 
-      console.log(`   🚀 Sending email to ${email}...`);
+      // Use the vendorItemsMap we already built
+      const vendorItems = vendorItemsMap[vendor] || [];
 
-      await sendRFQEmail(
-        rfqId,
-        projectInfo,
-        vendorItems,
-        { email, name: vendor },
-        fileLinks
-      );
+      console.log(`   📦 Items Selected For ${vendor}: ${vendorItems.length}`);
 
-      emailsSentCount++;
-      console.log(`   ✅ Email sent successfully to ${email}`);
+      try {
+        await sendRFQEmail(
+          rfqId,
+          projectInfo,
+          vendorItems,
+          { email, name: vendor },
+          fileLinks
+        );
+        emailsSentCount++;
+        console.log(`   ✅ Email sent successfully to ${email}`);
+      } catch (err) {
+        console.error(`   ❌ Error sending email to ${email}:`, err);
+        // don't rethrow — continue with next vendor
+      }
     }
 
     console.log("\n" + "=".repeat(100));
@@ -252,12 +295,6 @@ export const createQuote = async (req: Request, res: Response) => {
       awardEmailSent = true;
     } catch (error) {
       console.error(`❌ Failed to send award email to requester:`, error);
-      console.error(`❌ Error type:`, typeof error);
-      console.error(
-        `❌ Error message:`,
-        error instanceof Error ? error.message : error
-      );
-      // Don't fail the entire request if award email fails
     }
 
     // 5️⃣ Respond with Drive + Sheet info and email confirmation
@@ -268,15 +305,15 @@ export const createQuote = async (req: Request, res: Response) => {
       fileLinks,
       sheetUpdated: true,
       sheetResponse,
-      emailsSent: true,
+      emailsSent: emailsSentCount,
+      emailsSkipped: emailsSkippedCount,
       awardEmailSent,
-      // vendorCount: vendors.length,
     });
   } catch (err: any) {
     console.error("❌ Error creating RFQ:", err);
     res.status(500).json({
       success: false,
-      message: err.message || "Failed to create quote",
+      message: err?.message || "Failed to create quote",
     });
   }
 };
