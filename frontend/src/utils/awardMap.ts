@@ -13,7 +13,7 @@ interface VendorReply {
   total_price?: number;
   discount?: number;
   delivery_charge?: number;
-  lead_time?: string;
+  leadTime?: string; // Changed from lead_time to leadTime to match backend
   substitutions?: string;
   notes?: string;
   file_link?: string | null;
@@ -49,7 +49,6 @@ interface ItemWithVendors {
   unit?: string;
   rawItemName?: string;
   vendors: VendorQuote[];
-  
 }
 
 /**
@@ -74,11 +73,22 @@ export function transformVendorReplies(
     }
 
     // Push the vendor info into the item's vendor list
+    // Debug lead time conversion
+    console.log("🕐 Lead Time Debug for", reply.vendor_name, ":", {
+      raw_leadTime: reply.leadTime,
+      leadTime_type: typeof reply.leadTime,
+      extracted_date: reply.leadTime ? reply.leadTime.split("T")[0] : null,
+      local_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+
+    // Extract just the date part without timezone conversion
+    const leadTimeFormatted = reply.leadTime
+      ? reply.leadTime.split("T")[0]  // Extract "YYYY-MM-DD" from ISO string
+      : undefined;
+
     grouped[reply.item_name].vendors.push({
       vendorName: reply.vendor_name,
-      leadTime: reply.lead_time
-        ? new Date(reply.lead_time).toLocaleDateString()
-        : undefined,
+      leadTime: leadTimeFormatted,
       quotedPrice: reply.unit_price?.toFixed(2),
       notes: reply.notes || undefined,
       status: reply.status,

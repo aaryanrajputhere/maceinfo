@@ -95,13 +95,22 @@ const VendorReplyPage: React.FC = () => {
       const formData = new FormData();
 
       // Prepare itemReplies with all the data
-      const itemReplies = items.map((item, index) => ({
-        itemName: item["Item Name"] || `Item ${index + 1}`,
-        pricing: fields[index]?.price || "",
-        leadTime: fields[index]?.lead_time || "",
-        notes: fields[index]?.notes || "",
-        substitutions: fields[index]?.substitutions || "",
-      }));
+      const itemReplies = items.map((item, index) => {
+        // Convert lead time to UTC Date to avoid timezone issues
+        let leadTimeUTC = "";
+        if (fields[index]?.lead_time) {
+          const dateString = fields[index].lead_time;
+          leadTimeUTC = new Date(`${dateString}T00:00:00.000Z`).toISOString();
+        }
+
+        return {
+          itemName: item["Item Name"] || `Item ${index + 1}`,
+          pricing: fields[index]?.price || "",
+          leadTime: leadTimeUTC,
+          notes: fields[index]?.notes || "",
+          substitutions: fields[index]?.substitutions || "",
+        };
+      });
 
       // Add JSON data to FormData
       formData.append("itemReplies", JSON.stringify(itemReplies));

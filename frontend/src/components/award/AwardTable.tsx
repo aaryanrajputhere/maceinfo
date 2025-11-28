@@ -49,6 +49,19 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
   } | null>(null);
 
   useEffect(() => {
+    console.log('🎯 AwardTable received items:', items);
+    if (items && items.length > 0) {
+      items.forEach((item, idx) => {
+        console.log(`📦 Item ${idx}: ${item.itemName}`);
+        item.vendors?.forEach((vendor, vIdx) => {
+          console.log(`  👤 Vendor ${vIdx}: ${vendor.vendorName}`, {
+            leadTime_raw: vendor.leadTime,
+            leadTime_type: typeof vendor.leadTime,
+            leadTime_formatted: vendor.leadTime ? new Date(vendor.leadTime).toLocaleDateString('en-GB') : 'N/A'
+          });
+        });
+      });
+    }
     setLocalItems(items || []);
   }, [items]);
 
@@ -133,9 +146,20 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
                                     {v.vendorName}
                                   </div>
                                   <div className="text-sm text-gray-600">
-                                    {v.leadTime
-                                      ? `Lead: ${v.leadTime}`
-                                      : "Lead: -"}
+                                    {(() => {
+                                      console.log(`🔍 Rendering lead time for ${v.vendorName}:`, v.leadTime);
+                                      if (!v.leadTime) return "Lead: -";
+                                      try {
+                                        // Format YYYY-MM-DD to DD/MM/YYYY without Date conversion
+                                        const [year, month, day] = v.leadTime.split('-');
+                                        const formatted = `${day}/${month}/${year}`;
+                                        console.log(`  ✅ Formatted as: ${formatted}`);
+                                        return `Lead: ${formatted}`;
+                                      } catch (err) {
+                                        console.error(`  ❌ Error formatting:`, err);
+                                        return `Lead: ${v.leadTime}`;
+                                      }
+                                    })()}
                                   </div>
                                 </div>
                                 <div className="text-right flex items-center space-x-2">
@@ -294,7 +318,16 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
                       </div>
                     </div>
                     <div className="text-sm text-gray-600 mb-2">
-                      {v.leadTime ? `Lead: ${v.leadTime}` : "Lead: -"}
+                      {(() => {
+                        if (!v.leadTime) return "Lead: -";
+                        try {
+                          // Format YYYY-MM-DD to DD/MM/YYYY without Date conversion
+                          const [year, month, day] = v.leadTime.split('-');
+                          return `Lead: ${day}/${month}/${year}`;
+                        } catch (err) {
+                          return `Lead: ${v.leadTime}`;
+                        }
+                      })()}
                     </div>
                     {v.notes && (
                       <div className="mb-3 text-sm text-gray-700 line-clamp-2">
@@ -312,60 +345,60 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
                         View Details
                       </button>
                       {(() => {
-                          const isAwarded = v.status === "awarded";
-                          const btnBase =
-                            "ml-2 inline-flex items-center px-3 py-2 text-white rounded-lg text-sm font-semibold transition";
-                          const btnColor = isAwarded
-                            ? "bg-green-600 hover:bg-green-700"
-                            : "bg-blue-600 hover:bg-blue-700";
-                          const isDisabled = isAwarded;
-                          const disabledClass = isDisabled
-                            ? "opacity-80 cursor-not-allowed"
-                            : "cursor-pointer";
+                        const isAwarded = v.status === "awarded";
+                        const btnBase =
+                          "ml-2 inline-flex items-center px-3 py-2 text-white rounded-lg text-sm font-semibold transition";
+                        const btnColor = isAwarded
+                          ? "bg-green-600 hover:bg-green-700"
+                          : "bg-blue-600 hover:bg-blue-700";
+                        const isDisabled = isAwarded;
+                        const disabledClass = isDisabled
+                          ? "opacity-80 cursor-not-allowed"
+                          : "cursor-pointer";
 
-                          const handleAwardClick = async () => {
-                            if (isDisabled) return;
-                            setLocalItems((prev) =>
-                              prev.map((p) => {
-                                if (p.id !== it.id) return p;
-                                return {
-                                  ...p,
-                                  vendors: p.vendors.map((vv) =>
-                                    vv.vendorName === v.vendorName
-                                      ? { ...vv, status: "awarded" }
-                                      : vv
-                                  ),
-                                };
-                              })
-                            );
-
-                            try {
-                              const result = onAward
-                                ? (onAward as any)(it.id, v.vendorName)
-                                : undefined;
-                              if (
-                                result &&
-                                typeof (result as any).then === "function"
-                              ) {
-                                await result;
-                              }
-                            } catch (err) {
-                              console.error("Error in onAward:", err);
-                            } finally {
-                              setTimeout(() => window.location.reload(), 600);
-                            }
-                          };
-
-                          return (
-                            <button
-                              onClick={handleAwardClick}
-                              className={`${btnBase} ${btnColor} ${disabledClass}`}
-                              disabled={isDisabled}
-                            >
-                              {isAwarded ? "Awarded" : "Award"}
-                            </button>
+                        const handleAwardClick = async () => {
+                          if (isDisabled) return;
+                          setLocalItems((prev) =>
+                            prev.map((p) => {
+                              if (p.id !== it.id) return p;
+                              return {
+                                ...p,
+                                vendors: p.vendors.map((vv) =>
+                                  vv.vendorName === v.vendorName
+                                    ? { ...vv, status: "awarded" }
+                                    : vv
+                                ),
+                              };
+                            })
                           );
-                        })()}
+
+                          try {
+                            const result = onAward
+                              ? (onAward as any)(it.id, v.vendorName)
+                              : undefined;
+                            if (
+                              result &&
+                              typeof (result as any).then === "function"
+                            ) {
+                              await result;
+                            }
+                          } catch (err) {
+                            console.error("Error in onAward:", err);
+                          } finally {
+                            setTimeout(() => window.location.reload(), 600);
+                          }
+                        };
+
+                        return (
+                          <button
+                            onClick={handleAwardClick}
+                            className={`${btnBase} ${btnColor} ${disabledClass}`}
+                            disabled={isDisabled}
+                          >
+                            {isAwarded ? "Awarded" : "Award"}
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 ))
@@ -508,7 +541,15 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
                     Lead Time
                   </h3>
                   <p className="text-gray-900 font-semibold">
-                    {selectedVendor.vendor.leadTime}
+                    {(() => {
+                      try {
+                        // Format YYYY-MM-DD to DD/MM/YYYY without Date conversion
+                        const [year, month, day] = selectedVendor.vendor.leadTime.split('-');
+                        return `${day}/${month}/${year}`;
+                      } catch (err) {
+                        return selectedVendor.vendor.leadTime;
+                      }
+                    })()}
                   </p>
                 </div>
               )}
