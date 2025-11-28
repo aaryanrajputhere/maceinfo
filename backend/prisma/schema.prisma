@@ -68,7 +68,7 @@ model VendorReplyItem {
   total_price     Float
   discount        Float?
   delivery_charge Float?
-  lead_time       String
+  leadTime  DateTime @db.Timestamptz
   substitutions   String?
   notes          String?
   file_link       String?
