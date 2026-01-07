@@ -49,7 +49,7 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
   } | null>(null);
 
   useEffect(() => {
-    console.log('🎯 AwardTable received items:', items);
+    console.log("🎯 AwardTable received items:", items);
     if (items && items.length > 0) {
       items.forEach((item, idx) => {
         console.log(`📦 Item ${idx}: ${item.itemName}`);
@@ -57,7 +57,9 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
           console.log(`  👤 Vendor ${vIdx}: ${vendor.vendorName}`, {
             leadTime_raw: vendor.leadTime,
             leadTime_type: typeof vendor.leadTime,
-            leadTime_formatted: vendor.leadTime ? new Date(vendor.leadTime).toLocaleDateString('en-GB') : 'N/A'
+            leadTime_formatted: vendor.leadTime
+              ? new Date(vendor.leadTime).toLocaleDateString("en-GB")
+              : "N/A",
           });
         });
       });
@@ -147,16 +149,25 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
                                   </div>
                                   <div className="text-sm text-gray-600">
                                     {(() => {
-                                      console.log(`🔍 Rendering lead time for ${v.vendorName}:`, v.leadTime);
+                                      console.log(
+                                        `🔍 Rendering lead time for ${v.vendorName}:`,
+                                        v.leadTime
+                                      );
                                       if (!v.leadTime) return "Lead: -";
                                       try {
                                         // Format YYYY-MM-DD to DD/MM/YYYY without Date conversion
-                                        const [year, month, day] = v.leadTime.split('-');
+                                        const [year, month, day] =
+                                          v.leadTime.split("-");
                                         const formatted = `${day}/${month}/${year}`;
-                                        console.log(`  ✅ Formatted as: ${formatted}`);
+                                        console.log(
+                                          `  ✅ Formatted as: ${formatted}`
+                                        );
                                         return `Lead: ${formatted}`;
                                       } catch (err) {
-                                        console.error(`  ❌ Error formatting:`, err);
+                                        console.error(
+                                          `  ❌ Error formatting:`,
+                                          err
+                                        );
                                         return `Lead: ${v.leadTime}`;
                                       }
                                     })()}
@@ -322,7 +333,7 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
                         if (!v.leadTime) return "Lead: -";
                         try {
                           // Format YYYY-MM-DD to DD/MM/YYYY without Date conversion
-                          const [year, month, day] = v.leadTime.split('-');
+                          const [year, month, day] = v.leadTime.split("-");
                           return `Lead: ${day}/${month}/${year}`;
                         } catch (err) {
                           return `Lead: ${v.leadTime}`;
@@ -544,7 +555,8 @@ const AwardTable: React.FC<AwardTableProps> = ({ items, onAward }) => {
                     {(() => {
                       try {
                         // Format YYYY-MM-DD to DD/MM/YYYY without Date conversion
-                        const [year, month, day] = selectedVendor.vendor.leadTime.split('-');
+                        const [year, month, day] =
+                          selectedVendor.vendor.leadTime.split("-");
                         return `${day}/${month}/${year}`;
                       } catch (err) {
                         return selectedVendor.vendor.leadTime;

@@ -83,7 +83,7 @@ export function transformVendorReplies(
 
     // Extract just the date part without timezone conversion
     const leadTimeFormatted = reply.leadTime
-      ? reply.leadTime.split("T")[0]  // Extract "YYYY-MM-DD" from ISO string
+      ? reply.leadTime.split("T")[0] // Extract "YYYY-MM-DD" from ISO string
       : undefined;
 
     grouped[reply.item_name].vendors.push({

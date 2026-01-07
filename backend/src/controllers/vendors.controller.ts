@@ -309,7 +309,9 @@ export const handleVendorReply = async (req: Request, res: Response) => {
                 delivery_charge: isNaN(deliveryChargesNum)
                   ? undefined
                   : deliveryChargesNum,
-                leadTime: itemReply.leadTime ? new Date(itemReply.leadTime) : new Date(),
+                leadTime: itemReply.leadTime
+                  ? new Date(itemReply.leadTime)
+                  : new Date(),
                 substitutions: itemReply.substitutions || "",
                 notes: itemReply.notes || "",
                 file_link:
