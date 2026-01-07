@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-    Calculator,
     Plus,
     Info,
     Ruler,
@@ -153,8 +152,8 @@ const DeckCalculator: React.FC = () => {
         <div className="w-full max-w-lg mx-auto p-4 sm:p-6">
             <div
                 className={`bg-white rounded-2xl border-2 p-6 sm:p-8 transition-all duration-300 ${isHovered
-                        ? "shadow-2xl -translate-y-2 border-blue-200"
-                        : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
+                    ? "shadow-2xl -translate-y-2 border-blue-200"
+                    : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
                     }`}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
@@ -164,8 +163,8 @@ const DeckCalculator: React.FC = () => {
                     <div className="flex items-center space-x-3 mb-3">
                         <div
                             className={`p-3 rounded-xl transition-all duration-300 ${isHovered
-                                    ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
-                                    : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
+                                ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
+                                : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
                                 }`}
                         >
                             <Grid3x3 className="h-6 w-6 text-white" />
@@ -227,8 +226,8 @@ const DeckCalculator: React.FC = () => {
                                     key={spacing.value}
                                     onClick={() => setJoistSpacing(spacing.value as 12 | 16 | 24)}
                                     className={`flex-1 px-4 py-3 text-sm font-bold rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-98 ${joistSpacing === spacing.value
-                                            ? "bg-[#033159] text-white border-[#033159] shadow-md"
-                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
+                                        ? "bg-[#033159] text-white border-[#033159] shadow-md"
+                                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
                                         }`}
                                 >
                                     {spacing.label}
@@ -252,8 +251,8 @@ const DeckCalculator: React.FC = () => {
                                     key={board.value}
                                     onClick={() => setBoardWidth(board.value as 5.5 | 3.5)}
                                     className={`flex-1 px-4 py-3 text-sm font-bold rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-98 ${boardWidth === board.value
-                                            ? "bg-[#033159] text-white border-[#033159] shadow-md"
-                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
+                                        ? "bg-[#033159] text-white border-[#033159] shadow-md"
+                                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
                                         }`}
                                 >
                                     <div>{board.label}</div>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-    Calculator,
     Plus,
     Info,
     Ruler,
@@ -120,8 +119,8 @@ const RoofingCalculator: React.FC = () => {
         <div className="w-full max-w-lg mx-auto p-4 sm:p-6">
             <div
                 className={`bg-white rounded-2xl border-2 p-6 sm:p-8 transition-all duration-300 ${isHovered
-                        ? "shadow-2xl -translate-y-2 border-blue-200"
-                        : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
+                    ? "shadow-2xl -translate-y-2 border-blue-200"
+                    : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
                     }`}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
@@ -131,8 +130,8 @@ const RoofingCalculator: React.FC = () => {
                     <div className="flex items-center space-x-3 mb-3">
                         <div
                             className={`p-3 rounded-xl transition-all duration-300 ${isHovered
-                                    ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
-                                    : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
+                                ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
+                                : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
                                 }`}
                         >
                             <Home className="h-6 w-6 text-white" />
@@ -190,8 +189,8 @@ const RoofingCalculator: React.FC = () => {
                                     key={p.value}
                                     onClick={() => setPitch(p.value as "flat" | "4/12" | "6/12" | "8/12" | "12/12")}
                                     className={`px-3 py-2 text-sm font-bold rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-98 ${pitch === p.value
-                                            ? "bg-[#033159] text-white border-[#033159] shadow-md"
-                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
+                                        ? "bg-[#033159] text-white border-[#033159] shadow-md"
+                                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
                                         }`}
                                 >
                                     <div>{p.label}</div>

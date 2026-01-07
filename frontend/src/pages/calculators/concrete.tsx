@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
-    Calculator,
     Plus,
     Info,
-    Ruler,
     Package,
     DollarSign,
     Box,
@@ -111,8 +109,8 @@ const ConcreteCalculator: React.FC = () => {
         <div className="w-full max-w-lg mx-auto p-4 sm:p-6">
             <div
                 className={`bg-white rounded-2xl border-2 p-6 sm:p-8 transition-all duration-300 ${isHovered
-                        ? "shadow-2xl -translate-y-2 border-blue-200"
-                        : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
+                    ? "shadow-2xl -translate-y-2 border-blue-200"
+                    : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
                     }`}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
@@ -122,8 +120,8 @@ const ConcreteCalculator: React.FC = () => {
                     <div className="flex items-center space-x-3 mb-3">
                         <div
                             className={`p-3 rounded-xl transition-all duration-300 ${isHovered
-                                    ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
-                                    : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
+                                ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
+                                : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
                                 }`}
                         >
                             <Box className="h-6 w-6 text-white" />
