@@ -75,45 +75,123 @@ const Header = () => {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("Calculators")}
-                className={`flex items-center px-4 py-2.5 text-sm lg:text-base font-semibold rounded-xl transition-all duration-200 hover:shadow-md transform hover:scale-[1.02] ${
-                  activeDropdown === "Calculators"
-                    ? "bg-[#033159] text-white shadow-md"
-                    : "text-gray-700 hover:text-white hover:bg-[#033159]"
-                }`}
+                className={`flex items-center px-4 py-2.5 text-sm lg:text-base font-semibold rounded-xl transition-all duration-200 hover:shadow-md transform hover:scale-[1.02] ${activeDropdown === "Calculators"
+                  ? "bg-[#033159] text-white shadow-md"
+                  : "text-gray-700 hover:text-white hover:bg-[#033159]"
+                  }`}
               >
                 Calculators
                 <ChevronDown
-                  className={`ml-2 h-4 w-4 transition-transform duration-200 ${
-                    activeDropdown === "Calculators" ? "rotate-180" : ""
-                  }`}
+                  className={`ml-2 h-4 w-4 transition-transform duration-200 ${activeDropdown === "Calculators" ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
               {activeDropdown === "Calculators" && (
                 <div
-                  className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-xl overflow-hidden"
+                  className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100"
                   style={{ zIndex: 9999 }}
                 >
-                  <div className="p-2 space-y-1">
+                  <div className="p-2 space-y-1 max-h-96 overflow-y-auto">
+                    <a
+                      href="/calculators"
+                      onClick={() => setActiveDropdown(null)}
+                      className="flex items-center px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-[#033159] to-[#00598F] rounded-xl transition-all duration-200 hover:shadow-md transform hover:scale-[1.02] mb-2"
+                    >
+                      <div className="p-1.5 bg-white/20 rounded-lg mr-3">
+                        <span className="text-xs">🧮</span>
+                      </div>
+                      View All Calculators
+                    </a>
                     <a
                       href="/calculators/studs"
                       onClick={() => setActiveDropdown(null)}
                       className="flex items-center px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl transition-all duration-200 hover:bg-[#033159] hover:text-white hover:shadow-md transform hover:scale-[1.02]"
                     >
-                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3 transition-colors duration-200">
-                        <span className="text-xs">📐</span>
+                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3">
+                        <span className="text-xs">🔨</span>
                       </div>
-                      Studs Calculator
+                      Studs
                     </a>
                     <a
                       href="/calculators/osb"
                       onClick={() => setActiveDropdown(null)}
                       className="flex items-center px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl transition-all duration-200 hover:bg-[#033159] hover:text-white hover:shadow-md transform hover:scale-[1.02]"
                     >
-                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3 transition-colors duration-200">
+                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3">
                         <span className="text-xs">📊</span>
                       </div>
-                      OSB Calculator
+                      OSB Sheathing
+                    </a>
+                    <a
+                      href="/calculators/housewrap"
+                      onClick={() => setActiveDropdown(null)}
+                      className="flex items-center px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl transition-all duration-200 hover:bg-[#033159] hover:text-white hover:shadow-md transform hover:scale-[1.02]"
+                    >
+                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3">
+                        <span className="text-xs">🏠</span>
+                      </div>
+                      Housewrap
+                    </a>
+                    <a
+                      href="/calculators/siding"
+                      onClick={() => setActiveDropdown(null)}
+                      className="flex items-center px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl transition-all duration-200 hover:bg-[#033159] hover:text-white hover:shadow-md transform hover:scale-[1.02]"
+                    >
+                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3">
+                        <span className="text-xs">🎨</span>
+                      </div>
+                      Siding / Painting
+                    </a>
+                    <a
+                      href="/calculators/drywall"
+                      onClick={() => setActiveDropdown(null)}
+                      className="flex items-center px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl transition-all duration-200 hover:bg-[#033159] hover:text-white hover:shadow-md transform hover:scale-[1.02]"
+                    >
+                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3">
+                        <span className="text-xs">⬜</span>
+                      </div>
+                      Drywall
+                    </a>
+                    <a
+                      href="/calculators/insulation"
+                      onClick={() => setActiveDropdown(null)}
+                      className="flex items-center px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl transition-all duration-200 hover:bg-[#033159] hover:text-white hover:shadow-md transform hover:scale-[1.02]"
+                    >
+                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3">
+                        <span className="text-xs">💨</span>
+                      </div>
+                      Insulation
+                    </a>
+                    <a
+                      href="/calculators/concrete"
+                      onClick={() => setActiveDropdown(null)}
+                      className="flex items-center px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl transition-all duration-200 hover:bg-[#033159] hover:text-white hover:shadow-md transform hover:scale-[1.02]"
+                    >
+                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3">
+                        <span className="text-xs">📦</span>
+                      </div>
+                      Concrete
+                    </a>
+                    <a
+                      href="/calculators/roofing"
+                      onClick={() => setActiveDropdown(null)}
+                      className="flex items-center px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl transition-all duration-200 hover:bg-[#033159] hover:text-white hover:shadow-md transform hover:scale-[1.02]"
+                    >
+                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3">
+                        <span className="text-xs">🏘️</span>
+                      </div>
+                      Roofing
+                    </a>
+                    <a
+                      href="/calculators/deck"
+                      onClick={() => setActiveDropdown(null)}
+                      className="flex items-center px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl transition-all duration-200 hover:bg-[#033159] hover:text-white hover:shadow-md transform hover:scale-[1.02]"
+                    >
+                      <div className="p-1.5 bg-gray-100 rounded-lg mr-3">
+                        <span className="text-xs">🔲</span>
+                      </div>
+                      Deck Materials
                     </a>
                   </div>
                 </div>
@@ -201,14 +279,24 @@ const Header = () => {
                     Calculators
                   </div>
                   <ChevronDown
-                    className={`h-5 w-5 transition-transform ${
-                      isMobileDropdownOpen ? "rotate-180" : ""
-                    }`}
+                    className={`h-5 w-5 transition-transform ${isMobileDropdownOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
                 {isMobileDropdownOpen && (
                   <div className="bg-white">
+                    <a
+                      href="/calculators"
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center px-6 py-3 text-base font-bold text-white bg-gradient-to-r from-[#033159] to-[#00598F] transition-all duration-200"
+                    >
+                      <span className="mr-3 text-sm">🧮</span>
+                      View All Calculators
+                    </a>
                     <a
                       href="/calculators/studs"
                       onClick={() => {
@@ -217,8 +305,8 @@ const Header = () => {
                       }}
                       className="flex items-center px-6 py-3 text-base font-semibold text-gray-700 hover:text-white hover:bg-[#033159] transition-all duration-200"
                     >
-                      <span className="mr-3 text-sm">📐</span>
-                      Studs Calculator
+                      <span className="mr-3 text-sm">🔨</span>
+                      Studs
                     </a>
                     <a
                       href="/calculators/osb"
@@ -229,7 +317,84 @@ const Header = () => {
                       className="flex items-center px-6 py-3 text-base font-semibold text-gray-700 hover:text-white hover:bg-[#033159] transition-all duration-200"
                     >
                       <span className="mr-3 text-sm">📊</span>
-                      OSB Calculator
+                      OSB Sheathing
+                    </a>
+                    <a
+                      href="/calculators/housewrap"
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center px-6 py-3 text-base font-semibold text-gray-700 hover:text-white hover:bg-[#033159] transition-all duration-200"
+                    >
+                      <span className="mr-3 text-sm">🏠</span>
+                      Housewrap
+                    </a>
+                    <a
+                      href="/calculators/siding"
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center px-6 py-3 text-base font-semibold text-gray-700 hover:text-white hover:bg-[#033159] transition-all duration-200"
+                    >
+                      <span className="mr-3 text-sm">🎨</span>
+                      Siding / Painting
+                    </a>
+                    <a
+                      href="/calculators/drywall"
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center px-6 py-3 text-base font-semibold text-gray-700 hover:text-white hover:bg-[#033159] transition-all duration-200"
+                    >
+                      <span className="mr-3 text-sm">⬜</span>
+                      Drywall
+                    </a>
+                    <a
+                      href="/calculators/insulation"
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center px-6 py-3 text-base font-semibold text-gray-700 hover:text-white hover:bg-[#033159] transition-all duration-200"
+                    >
+                      <span className="mr-3 text-sm">💨</span>
+                      Insulation
+                    </a>
+                    <a
+                      href="/calculators/concrete"
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center px-6 py-3 text-base font-semibold text-gray-700 hover:text-white hover:bg-[#033159] transition-all duration-200"
+                    >
+                      <span className="mr-3 text-sm">📦</span>
+                      Concrete
+                    </a>
+                    <a
+                      href="/calculators/roofing"
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center px-6 py-3 text-base font-semibold text-gray-700 hover:text-white hover:bg-[#033159] transition-all duration-200"
+                    >
+                      <span className="mr-3 text-sm">🏘️</span>
+                      Roofing
+                    </a>
+                    <a
+                      href="/calculators/deck"
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center px-6 py-3 text-base font-semibold text-gray-700 hover:text-white hover:bg-[#033159] transition-all duration-200"
+                    >
+                      <span className="mr-3 text-sm">🔲</span>
+                      Deck Materials
                     </a>
                   </div>
                 )}
