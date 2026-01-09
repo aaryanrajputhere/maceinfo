@@ -7,8 +7,11 @@ import {
     DollarSign,
     Home,
 } from "lucide-react";
+import { useMaterials } from "../../hooks/useMaterials";
+import { addToQuoteWithDeduplication, showQuoteButtonFeedback } from "../../utils/quoteUtils";
 
 const RoofingCalculator: React.FC = () => {
+    const { materials } = useMaterials();
     const [roofArea, setRoofArea] = useState<number>(0);
     const [pitch, setPitch] = useState<"flat" | "4/12" | "6/12" | "8/12" | "12/12">("4/12");
     const [waste, setWaste] = useState<number>(10);
@@ -67,44 +70,24 @@ const RoofingCalculator: React.FC = () => {
         const quantity = manualOverride !== null ? manualOverride : result.bundles;
         if (quantity <= 0) return;
 
-        const existingQuote = JSON.parse(localStorage.getItem("quote") || "[]");
+        const res = addToQuoteWithDeduplication(
+            {
+                category: "Roofing",
+                name: "Roofing Shingles",
+                size: "Bundle (33.3 sq ft)",
+                unit: "bundle",
+                price: 29.99,
+                quantity: quantity,
+                vendors: "Home Depot, Lowes",
+                selectedVendors: ["Home Depot", "Lowes"],
+            },
+            materials
+        );
 
-        const newItem = {
-            id: Date.now(),
-            category: "Roofing",
-            name: "Roofing Shingles",
-            size: "Bundle (33.3 sq ft)",
-            unit: "bundle",
-            price: 29.99,
-            quantity: quantity,
-            vendors: "Home Depot, Lowes",
-            selectedVendors: ["Home Depot", "Lowes"],
-            image: "",
-            addedAt: new Date().toLocaleString(),
-        };
-
-        const updatedQuote = [...existingQuote, newItem];
-        localStorage.setItem("quote", JSON.stringify(updatedQuote));
-
-        const button = document.querySelector("[data-quote-btn]") as HTMLElement;
-        if (button) {
-            const originalText = button.textContent;
-            button.textContent = "Added to Quote!";
-            button.className = button.className.replace(
-                "bg-[#033159] hover:bg-[#022244]",
-                "bg-green-600 hover:bg-green-700"
-            );
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.className = button.className.replace(
-                    "bg-green-600 hover:bg-green-700",
-                    "bg-[#033159] hover:bg-[#022244]"
-                );
-            }, 2000);
-        }
-
-        window.dispatchEvent(new Event("storage"));
+        showQuoteButtonFeedback("[data-quote-btn]", !res.isNewItem);
     };
+
+
 
     const clearInputs = () => {
         setRoofArea(0);

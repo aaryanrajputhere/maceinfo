@@ -8,6 +8,28 @@ import { getGoogleAuth } from "../utils/googleAuth"; // common auth
 const drive = google.drive({ version: "v3", auth: getGoogleAuth() });
 const prisma = new PrismaClient();
 
+/**
+ * Sanitizes material data before saving to DB
+ */
+function sanitizeMaterialData(row: any) {
+  let itemName = String(row.itemName || "").trim();
+  let unit = String(row.unit || "").trim().toLowerCase();
+  let category = String(row.category || "").trim();
+  let size = String(row.size || "").trim();
+  let price = parseFloat(row.price) || 0;
+
+  itemName = itemName.replace(/[①②③④⑤⑥⑦⑧⑨⑩]/g, "").trim();
+
+
+  return {
+    itemName,
+    unit,
+    category,
+    size,
+    price: parseFloat(price.toFixed(2)), 
+  };
+}
+
 function bufferToStream(buffer: Buffer) {
   const readable = new Readable();
   readable.push(buffer);
@@ -37,7 +59,7 @@ export const syncRFQs = async (req: Request, res: Response) => {
         requester_email: row["requester_email"] || "",
         requester_phone:
           row["requester_phone"] !== undefined &&
-          row["requester_phone"] !== null
+            row["requester_phone"] !== null
             ? String(row["requester_phone"])
             : "",
         project_name: row["project_name"] || "",
@@ -160,14 +182,16 @@ export const syncMaterials = async (req: Request, res: Response) => {
         imagePath = `/uploads/materials/${fileName}`;
       }
 
+      const clean = sanitizeMaterialData(row);
+
       await prisma.material.upsert({
         where: {
           category_itemName_size_unit_price: {
-            category: row.category || "",
-            itemName: row.itemName || "",
-            size: row.size || "",
-            unit: row.unit || "",
-            price: row.price || 0,
+            category: clean.category,
+            itemName: clean.itemName,
+            size: clean.size,
+            unit: clean.unit,
+            price: clean.price,
           },
         },
         update: {
@@ -175,11 +199,11 @@ export const syncMaterials = async (req: Request, res: Response) => {
           vendors: row.vendors || null,
         },
         create: {
-          category: row.category || "",
-          itemName: row.itemName || "",
-          size: row.size || "",
-          unit: row.unit || "",
-          price: row.price || 0,
+          category: clean.category,
+          itemName: clean.itemName,
+          size: clean.size,
+          unit: clean.unit,
+          price: clean.price,
           image: imagePath,
           vendors: row.vendors || null,
         },

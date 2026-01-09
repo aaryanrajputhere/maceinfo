@@ -13,26 +13,31 @@ const features = [
     description:
       "Browse studs, OSB, drywall, lumber, and more with indicative pricing pulled from Google Sheets.",
     icon: <Package className="h-8 w-8 text-[#033159]" />,
+    link: "/materials",
   },
   {
     title: "Smart Calculators",
     description:
       "Estimate studs and OSB quantities instantly with built-in calculators and add results to your quote.",
     icon: <Calculator className="h-8 w-8 text-[#033159]" />,
+    link: "/calculators",
   },
   {
     title: "Quote Builder",
     description:
       "Add items, adjust quantities, and attach project details to generate a professional RFQ package.",
     icon: <ClipboardList className="h-8 w-8 text-[#033159]" />,
+    link: "/quote",
   },
   {
     title: "Vendor RFQ System",
     description:
       "Send requests directly to vendors and collect replies seamlessly—auto-logged into Google Sheets.",
     icon: <Mail className="h-8 w-8 text-[#033159]" />,
+    link: "/quote",
   },
 ];
+
 
 const LandingPage: React.FC = () => {
   return (
@@ -72,20 +77,22 @@ const LandingPage: React.FC = () => {
 
             <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {features.map((f, idx) => (
-                <div
+                <a
                   key={idx}
-                  className="bg-white shadow-md rounded-2xl border border-gray-100 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                  href={f.link}
+                  className="bg-white shadow-md rounded-2xl border border-gray-100 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col group"
                 >
-                  <div className="mb-4">{f.icon}</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <div className="mb-4 group-hover:scale-110 transition-transform">{f.icon}</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[#033159] transition-colors">
                     {f.title}
                   </h3>
                   <p className="text-gray-600 text-sm flex-grow">
                     {f.description}
                   </p>
-                </div>
+                </a>
               ))}
             </div>
+
           </div>
         </section>
       </main>

@@ -28,7 +28,6 @@ export const useMaterials = (filters?: FilterOptions) => {
         }
 
         const data = await response.json();
-      
 
         // Handle different response formats
         let materialsArray: any[] = [];
@@ -46,19 +45,21 @@ export const useMaterials = (filters?: FilterOptions) => {
 
         // Assign sequential IDs from 1 to n
         const materialsWithIds = materialsArray.map(
-          (material: any, index: number) => ({
-            id: index + 1,
-            Category: material.category,
-            "Item Name": material.itemName,
-            "Size/Option": material.size,
-            Unit: material.unit,
-            Price: material.price,
-            image: material.image,
-            Vendors: material.vendors,
-            createdAt: material.createdAt,
-            // Add other fields as needed
-          })
+          (material: any, index: number) => {
+            return {
+              id: index + 1,
+              Category: (material.category || "").trim(),
+              "Item Name": (material.itemName || "").trim(),
+              "Size/Option": (material.size || "").trim(),
+              Unit: material.unit,
+              Price: material.price,
+              image: material.image,
+              Vendors: material.vendors,
+              createdAt: material.createdAt,
+            };
+          }
         );
+
 
         setAllMaterials(materialsWithIds);
         setMaterials(materialsWithIds);
@@ -94,18 +95,20 @@ export const useMaterials = (filters?: FilterOptions) => {
           material["Size/Option"]?.toLowerCase().includes(searchLower) ||
           (Array.isArray(material.Vendors)
             ? material.Vendors.some((vendor: string) =>
-                vendor.toLowerCase().includes(searchLower)
-              )
+              vendor.toLowerCase().includes(searchLower)
+            )
             : material.Vendors?.toLowerCase().includes(searchLower))
       );
     }
 
-    // Apply category filter
+    // Apply category filter (case-insensitive)
     if (filters.category && filters.category.trim()) {
+      const filterCategoryLower = filters.category.toLowerCase().trim();
       filteredMaterials = filteredMaterials.filter(
-        (material) => material.Category === filters.category
+        (material) => material.Category?.toLowerCase().trim() === filterCategoryLower
       );
     }
+
 
     // Apply price range filter
     if (filters.priceRange && filters.priceRange !== "") {

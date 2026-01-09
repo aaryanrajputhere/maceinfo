@@ -7,8 +7,11 @@ import {
     DollarSign,
     Paintbrush,
 } from "lucide-react";
+import { useMaterials } from "../../hooks/useMaterials";
+import { addToQuoteWithDeduplication, showQuoteButtonFeedback } from "../../utils/quoteUtils";
 
 const SidingCalculator: React.FC = () => {
+    const { materials } = useMaterials();
     const [wallArea, setWallArea] = useState<number>(0);
     const [materialType, setMaterialType] = useState<"siding" | "paint">("siding");
     const [waste, setWaste] = useState<number>(10);
@@ -42,44 +45,24 @@ const SidingCalculator: React.FC = () => {
         const quantity = manualOverride !== null ? manualOverride : result;
         if (!quantity) return;
 
-        const existingQuote = JSON.parse(localStorage.getItem("quote") || "[]");
+        const res = addToQuoteWithDeduplication(
+            {
+                category: materialType === "siding" ? "Exterior" : "Paint",
+                name: materialType === "siding" ? "Vinyl Siding Panel 4x8" : "Exterior Paint",
+                size: materialType === "siding" ? "4' x 8' (32 sq ft)" : "1 Gallon (350 sq ft)",
+                unit: materialType === "siding" ? "panel" : "gallon",
+                price: materialType === "siding" ? 24.99 : 34.99,
+                quantity: quantity,
+                vendors: "Home Depot, Lowes, Sherwin-Williams",
+                selectedVendors: ["Home Depot", "Lowes"],
+            },
+            materials
+        );
 
-        const newItem = {
-            id: Date.now(),
-            category: materialType === "siding" ? "Exterior" : "Paint",
-            name: materialType === "siding" ? "Vinyl Siding Panel 4x8" : "Exterior Paint",
-            size: materialType === "siding" ? "4' x 8' (32 sq ft)" : "1 Gallon (350 sq ft)",
-            unit: materialType === "siding" ? "panel" : "gallon",
-            price: materialType === "siding" ? 24.99 : 34.99,
-            quantity: quantity,
-            vendors: "Home Depot, Lowes, Sherwin-Williams",
-            selectedVendors: ["Home Depot", "Lowes"],
-            image: "",
-            addedAt: new Date().toLocaleString(),
-        };
-
-        const updatedQuote = [...existingQuote, newItem];
-        localStorage.setItem("quote", JSON.stringify(updatedQuote));
-
-        const button = document.querySelector("[data-quote-btn]") as HTMLElement;
-        if (button) {
-            const originalText = button.textContent;
-            button.textContent = "Added to Quote!";
-            button.className = button.className.replace(
-                "bg-[#033159] hover:bg-[#022244]",
-                "bg-green-600 hover:bg-green-700"
-            );
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.className = button.className.replace(
-                    "bg-green-600 hover:bg-green-700",
-                    "bg-[#033159] hover:bg-[#022244]"
-                );
-            }, 2000);
-        }
-
-        window.dispatchEvent(new Event("storage"));
+        showQuoteButtonFeedback("[data-quote-btn]", !res.isNewItem);
     };
+
+
 
     const clearInputs = () => {
         setWallArea(0);

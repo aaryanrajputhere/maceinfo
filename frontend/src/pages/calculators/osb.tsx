@@ -7,8 +7,11 @@ import {
   Package,
   DollarSign,
 } from "lucide-react";
+import { useMaterials } from "../../hooks/useMaterials";
+import { addToQuoteWithDeduplication, showQuoteButtonFeedback } from "../../utils/quoteUtils";
 
 const OSBCalculator: React.FC = () => {
+  const { materials } = useMaterials();
   const [length, setLength] = useState<number>(0);
   const [width, setWidth] = useState<number>(0);
   const [waste, setWaste] = useState<number>(10);
@@ -44,51 +47,24 @@ const OSBCalculator: React.FC = () => {
   const addToQuote = () => {
     if (!result) return;
 
-    // Get existing quote items from localStorage
-    const existingQuote = JSON.parse(localStorage.getItem("quote") || "[]");
+    const res = addToQuoteWithDeduplication(
+      {
+        category: "Sheathing",
+        name: "OSB Sheathing 7/16 4x8",
+        size: "4' x 8'",
+        unit: "sheet",
+        price: 14.95,
+        quantity: result,
+        vendors: "Home Depot, Lowes",
+        selectedVendors: ["Home Depot", "Lowes"],
+      },
+      materials
+    );
 
-    // Create new OSB item matching the expected format
-    const newItem = {
-      id: Date.now(),
-      category: "Sheathing",
-      name: "OSB Sheathing 7/16 4x8",
-      size: "4' x 8'",
-      unit: "sheet",
-      price: 14.95,
-      quantity: result,
-      vendors: "Home Depot, Lowes",
-      selectedVendors: ["Home Depot", "Lowes"],
-      image: "",
-      addedAt: new Date().toLocaleString(),
-    };
-
-    // Add to existing quote items
-    const updatedQuote = [...existingQuote, newItem];
-
-    // Save back to localStorage
-    localStorage.setItem("quote", JSON.stringify(updatedQuote));
-
-    // Visual feedback
-    const button = document.querySelector("[data-quote-btn]") as HTMLElement;
-    if (button) {
-      const originalText = button.textContent;
-      button.textContent = "Added to Quote!";
-      button.className = button.className.replace(
-        "bg-[#033159] hover:bg-[#022244]",
-        "bg-green-600 hover:bg-green-700"
-      );
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.className = button.className.replace(
-          "bg-green-600 hover:bg-green-700",
-          "bg-[#033159] hover:bg-[#022244]"
-        );
-      }, 2000);
-    }
-
-    // Optional: Trigger a storage event to update other components
-    window.dispatchEvent(new Event("storage"));
+    showQuoteButtonFeedback("[data-quote-btn]", !res.isNewItem);
   };
+
+
 
   const clearInputs = () => {
     setLength(0);
@@ -99,11 +75,10 @@ const OSBCalculator: React.FC = () => {
   return (
     <div className="w-full max-w-lg mx-auto p-4 sm:p-6">
       <div
-        className={`bg-white rounded-2xl border-2 p-6 sm:p-8 transition-all duration-300 ${
-          isHovered
-            ? "shadow-2xl -translate-y-2 border-blue-200"
-            : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
-        }`}
+        className={`bg-white rounded-2xl border-2 p-6 sm:p-8 transition-all duration-300 ${isHovered
+          ? "shadow-2xl -translate-y-2 border-blue-200"
+          : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
+          }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -111,11 +86,10 @@ const OSBCalculator: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-3">
             <div
-              className={`p-3 rounded-xl transition-all duration-300 ${
-                isHovered
-                  ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
-                  : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
-              }`}
+              className={`p-3 rounded-xl transition-all duration-300 ${isHovered
+                ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
+                : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
+                }`}
             >
               <Calculator className="h-6 w-6 text-white" />
             </div>

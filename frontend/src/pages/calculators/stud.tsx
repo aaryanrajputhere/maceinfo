@@ -8,8 +8,11 @@ import {
   DollarSign,
   Home,
 } from "lucide-react";
+import { useMaterials } from "../../hooks/useMaterials";
+import { addToQuoteWithDeduplication, showQuoteButtonFeedback } from "../../utils/quoteUtils";
 
 const StudCalculator: React.FC = () => {
+  const { materials } = useMaterials();
   const [wallLength, setWallLength] = useState<number>(0);
   const [wallHeight, setWallHeight] = useState<number>(0);
   const [studSpacing, setStudSpacing] = useState<number>(16); // default 16"
@@ -76,87 +79,58 @@ const StudCalculator: React.FC = () => {
   const addToQuote = () => {
     if (!result) return;
 
-    // Get existing quote items from localStorage
-    const existingQuote = JSON.parse(localStorage.getItem("quote") || "[]");
-
-    // Create individual items for studs and plates
-    const timestamp = Date.now();
     const price = getLumberPrice(lumberSize);
-    const newItems = [];
 
     // Add Studs
-    newItems.push({
-      id: timestamp + 1,
-      category: "Framing",
-      name: `Stud ${lumberSize}`,
-      size: `${result.studLength}ft`,
-      unit: "pcs",
-      price: price,
-      quantity: result.studs,
-      vendors: "Home Depot,Lowes,Menards",
-      selectedVendors: ["Home Depot", "Lowes", "Menards"],
-      image: "",
-      addedAt: new Date().toLocaleString(),
-    });
+    const res1 = addToQuoteWithDeduplication(
+      {
+        category: "Framing",
+        name: `Stud ${lumberSize}`,
+        size: `${result.studLength}ft`,
+        unit: "pcs",
+        price: price,
+        quantity: result.studs,
+        vendors: "Home Depot, Lowes, Menards",
+        selectedVendors: ["Home Depot", "Lowes", "Menards"],
+      },
+      materials
+    );
 
     // Add Top Plate
-    newItems.push({
-      id: timestamp + 2,
-      category: "Framing",
-      name: `Top Plate ${lumberSize}`,
-      size: `${result.studLength}ft`,
-      unit: "pcs",
-      price: price,
-      quantity: Math.ceil(result.plates / 2), // Half of total plates
-      vendors: "Home Depot, Lowes, Menards",
-      selectedVendors: ["Home Depot", "Lowes", "Menards"],
-      image: "",
-      addedAt: new Date().toLocaleString(),
-    });
+    const res2 = addToQuoteWithDeduplication(
+      {
+        category: "Framing",
+        name: `Top Plate ${lumberSize}`,
+        size: `${result.studLength}ft`,
+        unit: "pcs",
+        price: price,
+        quantity: Math.ceil(result.plates / 2),
+        vendors: "Home Depot, Lowes, Menards",
+        selectedVendors: ["Home Depot", "Lowes", "Menards"],
+      },
+      materials
+    );
 
     // Add Bottom Plate
-    newItems.push({
-      id: timestamp + 3,
-      category: "Framing",
-      name: `Bottom Plate ${lumberSize}`,
-      size: `${result.studLength}ft`,
-      unit: "pcs",
-      price: price,
-      quantity: Math.ceil(result.plates / 2), // Half of total plates
-      vendors: "Home Depot, Lowes, Menards",
-      selectedVendors: ["Home Depot", "Lowes", "Menards"],
-      image: "",
-      addedAt: new Date().toLocaleString(),
-    });
+    const res3 = addToQuoteWithDeduplication(
+      {
+        category: "Framing",
+        name: `Bottom Plate ${lumberSize}`,
+        size: `${result.studLength}ft`,
+        unit: "pcs",
+        price: price,
+        quantity: Math.ceil(result.plates / 2),
+        vendors: "Home Depot, Lowes, Menards",
+        selectedVendors: ["Home Depot", "Lowes", "Menards"],
+      },
+      materials
+    );
 
-    // Add all new items to existing quote
-    const updatedQuote = [...existingQuote, ...newItems];
-
-    // Save back to localStorage
-    localStorage.setItem("quote", JSON.stringify(updatedQuote));
-    // Visual feedback
-    const button = document.querySelector(
-      "[data-stud-quote-btn]"
-    ) as HTMLElement;
-    if (button) {
-      const originalText = button.textContent;
-      button.textContent = "Added to Quote!";
-      button.className = button.className.replace(
-        "bg-[#033159] hover:bg-[#022244]",
-        "bg-green-600 hover:bg-green-700"
-      );
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.className = button.className.replace(
-          "bg-green-600 hover:bg-green-700",
-          "bg-[#033159] hover:bg-[#022244]"
-        );
-      }, 2000);
-    }
-
-    // Trigger storage event to update other components
-    window.dispatchEvent(new Event("storage"));
+    const anyUpdated = !res1.isNewItem || !res2.isNewItem || !res3.isNewItem;
+    showQuoteButtonFeedback("[data-stud-quote-btn]", anyUpdated);
   };
+
+
 
   const clearInputs = () => {
     setWallLength(0);
@@ -183,11 +157,10 @@ const StudCalculator: React.FC = () => {
   return (
     <div className="w-full max-w-lg mx-auto p-4 sm:p-6">
       <div
-        className={`bg-white rounded-2xl border-2 p-6 sm:p-8 transition-all duration-300 ${
-          isHovered
-            ? "shadow-2xl -translate-y-2 border-blue-200"
-            : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
-        }`}
+        className={`bg-white rounded-2xl border-2 p-6 sm:p-8 transition-all duration-300 ${isHovered
+          ? "shadow-2xl -translate-y-2 border-blue-200"
+          : "shadow-lg border-gray-100 hover:shadow-xl hover:-translate-y-1"
+          }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -195,11 +168,10 @@ const StudCalculator: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-3">
             <div
-              className={`p-3 rounded-xl transition-all duration-300 ${
-                isHovered
-                  ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
-                  : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
-              }`}
+              className={`p-3 rounded-xl transition-all duration-300 ${isHovered
+                ? "bg-gradient-to-br from-[#00598F] to-[#033159] shadow-lg"
+                : "bg-gradient-to-br from-[#033159] to-[#00598F] shadow-md"
+                }`}
             >
               <Hammer className="h-6 w-6 text-white" />
             </div>
@@ -281,11 +253,10 @@ const StudCalculator: React.FC = () => {
                 <button
                   key={size}
                   onClick={() => setLumberSize(size)}
-                  className={`flex-1 px-4 py-3 text-sm font-bold rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-98 ${
-                    lumberSize === size
-                      ? "bg-[#033159] text-white border-[#033159] shadow-md"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-bold rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-98 ${lumberSize === size
+                    ? "bg-[#033159] text-white border-[#033159] shadow-md"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
+                    }`}
                 >
                   {size}
                 </button>
@@ -306,11 +277,10 @@ const StudCalculator: React.FC = () => {
                 <button
                   key={spacing}
                   onClick={() => setStudSpacing(spacing)}
-                  className={`flex-1 px-4 py-3 text-sm font-bold rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-98 ${
-                    studSpacing === spacing
-                      ? "bg-[#033159] text-white border-[#033159] shadow-md"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-bold rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-98 ${studSpacing === spacing
+                    ? "bg-[#033159] text-white border-[#033159] shadow-md"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
+                    }`}
                 >
                   {spacing}"
                 </button>

@@ -7,8 +7,11 @@ import {
     DollarSign,
     Square,
 } from "lucide-react";
+import { useMaterials } from "../../hooks/useMaterials";
+import { addToQuoteWithDeduplication, showQuoteButtonFeedback } from "../../utils/quoteUtils";
 
 const DrywallCalculator: React.FC = () => {
+    const { materials } = useMaterials();
     const [wallArea, setWallArea] = useState<number>(0);
     const [ceilingArea, setCeilingArea] = useState<number>(0);
     const [boardSize, setBoardSize] = useState<"4x8" | "4x10" | "4x12">("4x8");
@@ -73,44 +76,24 @@ const DrywallCalculator: React.FC = () => {
         const quantity = manualOverride !== null ? manualOverride : result;
         if (!quantity) return;
 
-        const existingQuote = JSON.parse(localStorage.getItem("quote") || "[]");
+        const res = addToQuoteWithDeduplication(
+            {
+                category: "Drywall",
+                name: `Drywall Sheet ${boardSize}`,
+                size: `${boardSize.replace("x", "' x ")}' (${getBoardArea(boardSize)} sq ft)`,
+                unit: "sheet",
+                price: getBoardPrice(boardSize),
+                quantity: quantity,
+                vendors: "Home Depot, Lowes",
+                selectedVendors: ["Home Depot", "Lowes"],
+            },
+            materials
+        );
 
-        const newItem = {
-            id: Date.now(),
-            category: "Drywall",
-            name: `Drywall Sheet ${boardSize}`,
-            size: `${boardSize.replace("x", "' x ")}' (${getBoardArea(boardSize)} sq ft)`,
-            unit: "sheet",
-            price: getBoardPrice(boardSize),
-            quantity: quantity,
-            vendors: "Home Depot, Lowes",
-            selectedVendors: ["Home Depot", "Lowes"],
-            image: "",
-            addedAt: new Date().toLocaleString(),
-        };
-
-        const updatedQuote = [...existingQuote, newItem];
-        localStorage.setItem("quote", JSON.stringify(updatedQuote));
-
-        const button = document.querySelector("[data-quote-btn]") as HTMLElement;
-        if (button) {
-            const originalText = button.textContent;
-            button.textContent = "Added to Quote!";
-            button.className = button.className.replace(
-                "bg-[#033159] hover:bg-[#022244]",
-                "bg-green-600 hover:bg-green-700"
-            );
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.className = button.className.replace(
-                    "bg-green-600 hover:bg-green-700",
-                    "bg-[#033159] hover:bg-[#022244]"
-                );
-            }, 2000);
-        }
-
-        window.dispatchEvent(new Event("storage"));
+        showQuoteButtonFeedback("[data-quote-btn]", !res.isNewItem);
     };
+
+
 
     const clearInputs = () => {
         setWallArea(0);

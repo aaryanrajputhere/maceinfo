@@ -1,25 +1,3 @@
-function saveQuoteToLocalStorage(item: {
-  category: string;
-  name: string;
-  size: string;
-  unit: string;
-  price: number;
-  Vendors: string;
-  quantity: number;
-  image: string;
-  addedAt: string;
-  selectedVendors: string[];
-}) {
-  try {
-    const existing = JSON.parse(localStorage.getItem("quote") || "[]");
-    const updated = Array.isArray(existing) ? [...existing, item] : [item];
-    localStorage.setItem("quote", JSON.stringify(updated));
-  } catch (err) {
-    console.error("Failed to save to localStorage:", err);
-    localStorage.setItem("quote", JSON.stringify([item]));
-  }
-}
-
 import React, { useState } from "react";
 import {
   ShoppingCart,
@@ -32,6 +10,7 @@ import {
   Calculator,
 } from "lucide-react";
 import type { Material } from "../../types/materials";
+import { addToQuoteWithDeduplication } from "../../utils/quoteUtils";
 
 const Tooltip: React.FC<{ content: string; children: React.ReactNode }> = ({
   content,
@@ -67,16 +46,17 @@ const MaterialCard: React.FC<{ material: Material }> = ({ material }) => {
 
   const [quantity, setQuantity] = useState<number | string>(1);
   console.log(material);
-  // Vendors is now always string[]
+  // Vendors is now always string[], deduplicated
   let vendors: string[] = [];
   if (Array.isArray(material.Vendors)) {
-    vendors = material.Vendors;
+    vendors = [...new Set(material.Vendors)];
   } else if (
     typeof material.Vendors === "string" &&
     material.Vendors.length > 0
   ) {
-    vendors = material.Vendors.split(",").map((v: string) => v.trim());
+    vendors = [...new Set(material.Vendors.split(",").map((v: string) => v.trim()))];
   }
+
   const {
     Category,
     "Item Name": name,
@@ -132,9 +112,8 @@ const MaterialCard: React.FC<{ material: Material }> = ({ material }) => {
             <img
               src={directImageUrl}
               alt={name}
-              className={`w-full h-full object-cover transition-transform duration-500 ${
-                isHovered ? "scale-110" : "scale-100"
-              }`}
+              className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? "scale-110" : "scale-100"
+                }`}
               onError={() => setImgError(true)}
             />
           ) : (
@@ -143,9 +122,8 @@ const MaterialCard: React.FC<{ material: Material }> = ({ material }) => {
             </div>
           )}
           <div
-            className={`absolute inset-0 bg-black bg-opacity-25 transition-opacity duration-300 ${
-              isHovered ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute inset-0 bg-black bg-opacity-25 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
+              }`}
           />
           {isHovered && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -434,38 +412,24 @@ const MaterialCard: React.FC<{ material: Material }> = ({ material }) => {
               <button
                 className="w-full px-6 py-4 min-h-[44px] bg-gradient-to-r from-[#033159] to-[#00598F] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:from-[#022244] hover:to-[#004a7a] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#033159] focus-visible:ring-offset-2 flex items-center justify-center space-x-3 text-base"
                 onClick={() => {
-                  // Always set selectedVendors as all vendors by default
-                  let selectedVendors: string[] = [];
-                  if (Array.isArray(material.Vendors)) {
-                    selectedVendors = material.Vendors;
-                  } else if (
-                    typeof material.Vendors === "string" &&
-                    material.Vendors.length > 0
-                  ) {
-                    selectedVendors = material.Vendors.split(",").map(
-                      (v: string) => v.trim()
-                    );
-                  }
+                  const cleanedPrice = Number(price.toString().replace(/[^0-9.-]/g, ""));
 
-                  const quoteItem = {
-                    id: Date.now(),
+                  const selectedVendorsList = Array.isArray(vendors) ? vendors : [];
+
+                  addToQuoteWithDeduplication({
                     category: Category,
                     name,
                     size,
                     unit,
-                    price: Number(price.toString().replace(/[^0-9.-]/g, "")), // convert string -> number and remove currency symbols
-                    Vendors: material.Vendors,
+                    price: cleanedPrice,
+                    vendors: selectedVendorsList.join(", "),
                     quantity: Number(quantity),
                     image: material.image || "",
-                    selectedVendors,
-                    addedAt: new Date().toLocaleString(),
-                  };
-
-                  console.log("Added to Quote:", quoteItem);
+                    selectedVendors: selectedVendorsList,
+                  });
 
                   setIsPanelOpen(false);
                   setShowPopup(true);
-                  saveQuoteToLocalStorage(quoteItem);
                   setTimeout(() => {
                     setShowPopup(false);
                   }, 5000);
@@ -477,42 +441,45 @@ const MaterialCard: React.FC<{ material: Material }> = ({ material }) => {
           </div>
         </div>
       )}
+
       {/* Success Popup */}
-      {showPopup && (
-        <div
-          onClick={() => (window.location.href = "/quote")}
-          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 cursor-pointer animate-slide-up"
-        >
-          <div className="bg-white border border-gray-300 rounded-xl px-6 py-4 shadow-2xl flex items-center space-x-4 hover:shadow-3xl transition-all duration-300">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-[#033159] to-[#00598F] text-white">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <div className="text-gray-800">
-              <p className="font-bold text-[#033159] text-base">
-                Added to Quote
-              </p>
-              <p className="text-sm text-gray-600 font-medium">
-                {quantity} × {name} = ${calculateTotal().toFixed(2)}
-              </p>
-              <p className="text-xs text-gray-500 font-medium">
-                Click to view quote →
-              </p>
+      {
+        showPopup && (
+          <div
+            onClick={() => (window.location.href = "/quote")}
+            className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 cursor-pointer animate-slide-up"
+          >
+            <div className="bg-white border border-gray-300 rounded-xl px-6 py-4 shadow-2xl flex items-center space-x-4 hover:shadow-3xl transition-all duration-300">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-[#033159] to-[#00598F] text-white">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <div className="text-gray-800">
+                <p className="font-bold text-[#033159] text-base">
+                  Added to Quote
+                </p>
+                <p className="text-sm text-gray-600 font-medium">
+                  {quantity} × {name} = ${calculateTotal().toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-500 font-medium">
+                  Click to view quote →
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <style>
         {`

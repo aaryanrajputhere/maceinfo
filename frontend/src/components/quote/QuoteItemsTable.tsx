@@ -65,9 +65,8 @@ const QuoteItemsTable: React.FC<QuoteItemsTableProps> = ({
               {items.map((item, index) => (
                 <div
                   key={item.id}
-                  className={`border border-gray-200 rounded-2xl p-6 hover:bg-blue-50 transition-colors duration-200 ${
-                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  }`}
+                  className={`border border-gray-200 rounded-2xl p-6 hover:bg-blue-50 transition-colors duration-200 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    }`}
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     {/* Left side - Item details */}
@@ -93,7 +92,9 @@ const QuoteItemsTable: React.FC<QuoteItemsTableProps> = ({
                           Price
                         </div>
                         <div className="text-lg font-bold text-gray-900">
-                          {item.Price ? `$${item.Price}` : "N/A"}
+                          {item.Price
+                            ? `$${parseFloat(String(item.Price)).toFixed(2)}`
+                            : "N/A"}
                         </div>
                       </div>
 
@@ -129,7 +130,7 @@ const QuoteItemsTable: React.FC<QuoteItemsTableProps> = ({
                         </div>
                         <div className="flex flex-col gap-2">
                           {typeof item.Vendors === "string" &&
-                          item.Vendors.trim() ? (
+                            item.Vendors.trim() ? (
                             item.Vendors.split(",").map(
                               (vendor: string, vIdx: number) => {
                                 const trimmedVendor = vendor.trim();
@@ -179,9 +180,9 @@ const QuoteItemsTable: React.FC<QuoteItemsTableProps> = ({
                                             quoteArr[itemIndex].selectedVendors
                                           )
                                             ? [
-                                                ...quoteArr[itemIndex]
-                                                  .selectedVendors,
-                                              ]
+                                              ...quoteArr[itemIndex]
+                                                .selectedVendors,
+                                            ]
                                             : [];
                                         if (e.target.checked) {
                                           if (
