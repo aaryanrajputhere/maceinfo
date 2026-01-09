@@ -203,6 +203,7 @@ const StudCalculator: React.FC = () => {
 
               <input
                 type="number"
+                min="0"
                 value={wallLength || ""}
                 onChange={(e) => setWallLength(Number(e.target.value) || 0)}
                 placeholder="0"
@@ -226,6 +227,7 @@ const StudCalculator: React.FC = () => {
 
               <input
                 type="number"
+                min="0"
                 value={wallHeight || ""}
                 onChange={(e) => setWallHeight(Number(e.target.value) || 0)}
                 placeholder="8"
@@ -307,6 +309,7 @@ const StudCalculator: React.FC = () => {
 
               <input
                 type="number"
+                min="0"
                 value={openingWidth || ""}
                 onChange={(e) => setOpeningWidth(Number(e.target.value) || 0)}
                 placeholder="0"

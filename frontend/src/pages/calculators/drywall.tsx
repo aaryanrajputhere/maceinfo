@@ -145,6 +145,7 @@ const DrywallCalculator: React.FC = () => {
                             </label>
                             <input
                                 type="number"
+                                min="0"
                                 value={wallArea || ""}
                                 onChange={(e) => setWallArea(Number(e.target.value) || 0)}
                                 placeholder="0"
@@ -159,6 +160,7 @@ const DrywallCalculator: React.FC = () => {
                             </label>
                             <input
                                 type="number"
+                                min="0"
                                 value={ceilingArea || ""}
                                 onChange={(e) => setCeilingArea(Number(e.target.value) || 0)}
                                 placeholder="0"
@@ -278,6 +280,7 @@ const DrywallCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualOverride || ""}
                                     onChange={(e) =>
                                         setManualOverride(

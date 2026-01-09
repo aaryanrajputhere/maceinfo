@@ -133,6 +133,7 @@ const ConcreteCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={slabLength || ""}
                                     onChange={(e) => setSlabLength(Number(e.target.value) || 0)}
                                     placeholder="0"
@@ -145,6 +146,7 @@ const ConcreteCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={slabWidth || ""}
                                     onChange={(e) => setSlabWidth(Number(e.target.value) || 0)}
                                     placeholder="0"
@@ -157,6 +159,7 @@ const ConcreteCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={slabDepth || ""}
                                     onChange={(e) => setSlabDepth(Number(e.target.value) || 0)}
                                     placeholder="0"
@@ -179,6 +182,7 @@ const ConcreteCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={footingLength || ""}
                                     onChange={(e) => setFootingLength(Number(e.target.value) || 0)}
                                     placeholder="0"
@@ -191,6 +195,7 @@ const ConcreteCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={footingWidth || ""}
                                     onChange={(e) => setFootingWidth(Number(e.target.value) || 0)}
                                     placeholder="0"
@@ -203,6 +208,7 @@ const ConcreteCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={footingDepth || ""}
                                     onChange={(e) => setFootingDepth(Number(e.target.value) || 0)}
                                     placeholder="0"
@@ -262,6 +268,7 @@ const ConcreteCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     step="0.01"
                                     value={manualOverride || ""}
                                     onChange={(e) =>

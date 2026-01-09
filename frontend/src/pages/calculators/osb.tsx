@@ -114,6 +114,7 @@ const OSBCalculator: React.FC = () => {
               </label>
               <input
                 type="number"
+                min="0"
                 value={length || ""}
                 onChange={(e) => setLength(Number(e.target.value) || 0)}
                 placeholder="0"
@@ -128,6 +129,7 @@ const OSBCalculator: React.FC = () => {
               </label>
               <input
                 type="number"
+                min="0"
                 value={width || ""}
                 onChange={(e) => setWidth(Number(e.target.value) || 0)}
                 placeholder="0"

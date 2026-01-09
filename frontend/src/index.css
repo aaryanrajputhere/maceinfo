@@ -4,13 +4,30 @@
 /* index.css */
 html,
 body {
-  -ms-overflow-style: none; /* IE & Edge */
-  scrollbar-width: none; /* Firefox */
-  height: 100dvh; /* Use dynamic viewport height */
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  -ms-overflow-style: none;
+  /* IE & Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  height: 100dvh;
+  /* Use dynamic viewport height */
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
 }
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
+}
+
+/* Hide number input spinners (arrows) */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }

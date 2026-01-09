@@ -117,6 +117,7 @@ const HousewrapCalculator: React.FC = () => {
                             </label>
                             <input
                                 type="number"
+                                min="0"
                                 value={wallLength || ""}
                                 onChange={(e) => setWallLength(Number(e.target.value) || 0)}
                                 placeholder="0"
@@ -131,6 +132,7 @@ const HousewrapCalculator: React.FC = () => {
                             </label>
                             <input
                                 type="number"
+                                min="0"
                                 value={wallHeight || ""}
                                 onChange={(e) => setWallHeight(Number(e.target.value) || 0)}
                                 placeholder="0"
@@ -221,6 +223,7 @@ const HousewrapCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualOverride || ""}
                                     onChange={(e) =>
                                         setManualOverride(

@@ -137,6 +137,7 @@ const RoofingCalculator: React.FC = () => {
                         </label>
                         <input
                             type="number"
+                            min="0"
                             value={roofArea || ""}
                             onChange={(e) => setRoofArea(Number(e.target.value) || 0)}
                             placeholder="0"
@@ -266,6 +267,7 @@ const RoofingCalculator: React.FC = () => {
                                 </label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualOverride || ""}
                                     onChange={(e) =>
                                         setManualOverride(

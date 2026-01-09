@@ -21,6 +21,31 @@ import Award from "./pages/award";
 const App: React.FC = () => {
   const location = useLocation();
 
+  // Disable number input scroll behavior and negative values
+  React.useEffect(() => {
+    const handleWheel = () => {
+      if (document.activeElement instanceof HTMLInputElement &&
+        document.activeElement.type === "number") {
+        document.activeElement.blur();
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement instanceof HTMLInputElement &&
+        document.activeElement.type === "number") {
+        if (e.key === "-" || e.key === "e") {
+          e.preventDefault();
+        }
+      }
+    };
+
+    document.addEventListener("wheel", handleWheel, { passive: false });
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("wheel", handleWheel);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   // Hide header/footer on vendor-reply route
   const isVendorReply = /^\/vendor-reply\//.test(location.pathname);

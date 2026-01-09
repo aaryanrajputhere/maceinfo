@@ -7,8 +7,11 @@ import {
     DollarSign,
     Grid3x3,
 } from "lucide-react";
+import { useMaterials } from "../../hooks/useMaterials";
+import { addToQuoteWithDeduplication, showQuoteButtonFeedback } from "../../utils/quoteUtils";
 
 const DeckCalculator: React.FC = () => {
+    const { materials } = useMaterials();
     const [deckLength, setDeckLength] = useState<number>(0);
     const [deckWidth, setDeckWidth] = useState<number>(0);
     const [joistSpacing, setJoistSpacing] = useState<12 | 16 | 24>(16);
@@ -60,15 +63,12 @@ const DeckCalculator: React.FC = () => {
         const boardQty = manualOverrideBoards !== null ? manualOverrideBoards : result.deckBoards;
         const rimQty = manualOverrideRim !== null ? manualOverrideRim : result.rimJoists;
 
-        const existingQuote = JSON.parse(localStorage.getItem("quote") || "[]");
-        const timestamp = Date.now();
-        const newItems = [];
+        let anyUpdated = false;
 
         // Add Joists
         if (joistQty > 0) {
-            newItems.push({
-                id: timestamp + 1,
-                category: "Deck",
+            const res = addToQuoteWithDeduplication({
+                category: "Decking",
                 name: "Deck Joist 2x8",
                 size: "8ft",
                 unit: "pcs",
@@ -76,16 +76,14 @@ const DeckCalculator: React.FC = () => {
                 quantity: joistQty,
                 vendors: "Home Depot, Lowes",
                 selectedVendors: ["Home Depot", "Lowes"],
-                image: "",
-                addedAt: new Date().toLocaleString(),
-            });
+            }, materials);
+            if (!res.isNewItem) anyUpdated = true;
         }
 
         // Add Deck Boards
         if (boardQty > 0) {
-            newItems.push({
-                id: timestamp + 2,
-                category: "Deck",
+            const res = addToQuoteWithDeduplication({
+                category: "Decking",
                 name: boardWidth === 5.5 ? "Deck Board 5/4x6" : "Deck Board 2x4",
                 size: "8ft",
                 unit: "pcs",
@@ -93,16 +91,14 @@ const DeckCalculator: React.FC = () => {
                 quantity: boardQty,
                 vendors: "Home Depot, Lowes",
                 selectedVendors: ["Home Depot", "Lowes"],
-                image: "",
-                addedAt: new Date().toLocaleString(),
-            });
+            }, materials);
+            if (!res.isNewItem) anyUpdated = true;
         }
 
         // Add Rim Joists
         if (rimQty > 0) {
-            newItems.push({
-                id: timestamp + 3,
-                category: "Deck",
+            const res = addToQuoteWithDeduplication({
+                category: "Decking",
                 name: "Rim Joist 2x8",
                 size: "8ft",
                 unit: "pcs",
@@ -110,32 +106,11 @@ const DeckCalculator: React.FC = () => {
                 quantity: rimQty,
                 vendors: "Home Depot, Lowes",
                 selectedVendors: ["Home Depot", "Lowes"],
-                image: "",
-                addedAt: new Date().toLocaleString(),
-            });
+            }, materials);
+            if (!res.isNewItem) anyUpdated = true;
         }
 
-        const updatedQuote = [...existingQuote, ...newItems];
-        localStorage.setItem("quote", JSON.stringify(updatedQuote));
-
-        const button = document.querySelector("[data-quote-btn]") as HTMLElement;
-        if (button) {
-            const originalText = button.textContent;
-            button.textContent = "Added to Quote!";
-            button.className = button.className.replace(
-                "bg-[#033159] hover:bg-[#022244]",
-                "bg-green-600 hover:bg-green-700"
-            );
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.className = button.className.replace(
-                    "bg-green-600 hover:bg-green-700",
-                    "bg-[#033159] hover:bg-[#022244]"
-                );
-            }, 2000);
-        }
-
-        window.dispatchEvent(new Event("storage"));
+        showQuoteButtonFeedback("[data-quote-btn]", anyUpdated);
     };
 
     const clearInputs = () => {
@@ -188,6 +163,7 @@ const DeckCalculator: React.FC = () => {
                             </label>
                             <input
                                 type="number"
+                                min="0"
                                 value={deckLength || ""}
                                 onChange={(e) => setDeckLength(Number(e.target.value) || 0)}
                                 placeholder="0"
@@ -202,6 +178,7 @@ const DeckCalculator: React.FC = () => {
                             </label>
                             <input
                                 type="number"
+                                min="0"
                                 value={deckWidth || ""}
                                 onChange={(e) => setDeckWidth(Number(e.target.value) || 0)}
                                 placeholder="0"
@@ -286,6 +263,7 @@ const DeckCalculator: React.FC = () => {
                                 </div>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualOverrideJoists || ""}
                                     onChange={(e) =>
                                         setManualOverrideJoists(
@@ -312,6 +290,7 @@ const DeckCalculator: React.FC = () => {
                                 </div>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualOverrideBoards || ""}
                                     onChange={(e) =>
                                         setManualOverrideBoards(
@@ -338,6 +317,7 @@ const DeckCalculator: React.FC = () => {
                                 </div>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualOverrideRim || ""}
                                     onChange={(e) =>
                                         setManualOverrideRim(
